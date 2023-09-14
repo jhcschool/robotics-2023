@@ -30,14 +30,19 @@ public class TeamPropProcessor implements VisionProcessor {
     private Point tlRight = new Point(426, 0);
     private Point brRight = new Point(640, 480);
 
-    private Scalar lowerThreshold = new Scalar(0, 0, 0);
-    private Scalar upperThreshold = new Scalar(0, 0, 0);
+    // Threshold for red should be around (0, 100, 100) to (10, 255, 255) and (160, 100, 100) to (179, 255, 255)
+    private Scalar lowerThreshold = new Scalar(0, 100, 100);
+    private Scalar upperThreshold = new Scalar(10, 255, 255);
+
+    private Scalar lowerThreshold2 = new Scalar(160, 100, 100);
+    private Scalar upperThreshold2 = new Scalar(179, 255, 255);
 
     private Detection detection = null;
     private Object detectionLock = new Object();
 
     private Mat hsv = new Mat();
     private Mat threshold = new Mat();
+    private Mat threshold2 = new Mat();
 
     public TeamPropProcessor() {
     }
@@ -60,11 +65,38 @@ public class TeamPropProcessor implements VisionProcessor {
         this.brRight = brRight;
         this.lowerThreshold = lowerThreshold;
         this.upperThreshold = upperThreshold;
+
+        lowerThreshold2 = null;
+        upperThreshold2 = null;
     }
+
+    public TeamPropProcessor(Point tlLeft, Point brLeft, Point tlCenter, Point brCenter, Point tlRight, Point brRight, Scalar lowerThreshold, Scalar upperThreshold, Scalar lowerThreshold2, Scalar upperThreshold2) {
+        this.tlLeft = tlLeft;
+        this.brLeft = brLeft;
+        this.tlCenter = tlCenter;
+        this.brCenter = brCenter;
+        this.tlRight = tlRight;
+        this.brRight = brRight;
+        this.lowerThreshold = lowerThreshold;
+        this.upperThreshold = upperThreshold;
+        this.lowerThreshold2 = lowerThreshold2;
+        this.upperThreshold2 = upperThreshold2;
+    }
+
 
     public TeamPropProcessor(Scalar lowerThreshold, Scalar upperThreshold) {
         this.lowerThreshold = lowerThreshold;
         this.upperThreshold = upperThreshold;
+
+        lowerThreshold2 = null;
+        upperThreshold2 = null;
+    }
+
+    private TeamPropProcessor(Scalar lowerThreshold, Scalar upperThreshold, Scalar lowerThreshold2, Scalar upperThreshold2) {
+        this.lowerThreshold = lowerThreshold;
+        this.upperThreshold = upperThreshold;
+        this.lowerThreshold2 = lowerThreshold2;
+        this.upperThreshold2 = upperThreshold2;
     }
 
     @Override
@@ -80,6 +112,11 @@ public class TeamPropProcessor implements VisionProcessor {
         // Process: check left, center, and right for threshold. Returns with best detection.
         Imgproc.cvtColor(frame, hsv, Imgproc.COLOR_RGB2HSV);
         Core.inRange(hsv, lowerThreshold, upperThreshold, threshold);
+
+        if (lowerThreshold2 != null && upperThreshold2 != null) {
+            Core.inRange(hsv, lowerThreshold2, upperThreshold2, threshold2);
+            Core.bitwise_or(threshold, threshold2, threshold);
+        }
 
         // Check left
         int leftCount = Core.countNonZero(threshold.submat((int) tlLeft.y, (int) brLeft.y, (int) tlLeft.x, (int) brLeft.x));
