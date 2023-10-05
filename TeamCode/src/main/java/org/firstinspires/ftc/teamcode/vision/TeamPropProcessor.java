@@ -23,12 +23,15 @@ public class TeamPropProcessor implements VisionProcessor {
 
     private Point tlLeft = new Point(0, 0);
     private Point brLeft = new Point(213, 480);
+    private int leftPixelCount = 0;
 
     private Point tlCenter = new Point(213, 0);
     private Point brCenter = new Point(426, 480);
+    private int centerPixelCount = 0;
 
     private Point tlRight = new Point(426, 0);
     private Point brRight = new Point(640, 480);
+    private int rightPixelCount = 0;
 
     // Threshold for red should be around (0, 100, 100) to (10, 255, 255) and (160, 100, 100) to (179, 255, 255)
     private Scalar lowerThreshold = new Scalar(0, 100, 100);
@@ -44,32 +47,6 @@ public class TeamPropProcessor implements VisionProcessor {
     private Mat threshold = new Mat();
     private Mat threshold2 = new Mat();
 
-    public TeamPropProcessor() {
-    }
-
-    public TeamPropProcessor(Point tlLeft, Point brLeft, Point tlCenter, Point brCenter, Point tlRight, Point brRight) {
-        this.tlLeft = tlLeft;
-        this.brLeft = brLeft;
-        this.tlCenter = tlCenter;
-        this.brCenter = brCenter;
-        this.tlRight = tlRight;
-        this.brRight = brRight;
-    }
-
-    public TeamPropProcessor(Point tlLeft, Point brLeft, Point tlCenter, Point brCenter, Point tlRight, Point brRight, Scalar lowerThreshold, Scalar upperThreshold) {
-        this.tlLeft = tlLeft;
-        this.brLeft = brLeft;
-        this.tlCenter = tlCenter;
-        this.brCenter = brCenter;
-        this.tlRight = tlRight;
-        this.brRight = brRight;
-        this.lowerThreshold = lowerThreshold;
-        this.upperThreshold = upperThreshold;
-
-        lowerThreshold2 = null;
-        upperThreshold2 = null;
-    }
-
     public TeamPropProcessor(Point tlLeft, Point brLeft, Point tlCenter, Point brCenter, Point tlRight, Point brRight, Scalar lowerThreshold, Scalar upperThreshold, Scalar lowerThreshold2, Scalar upperThreshold2) {
         this.tlLeft = tlLeft;
         this.brLeft = brLeft;
@@ -81,22 +58,14 @@ public class TeamPropProcessor implements VisionProcessor {
         this.upperThreshold = upperThreshold;
         this.lowerThreshold2 = lowerThreshold2;
         this.upperThreshold2 = upperThreshold2;
+
+        calculatePixelCounts();
     }
 
-
-    public TeamPropProcessor(Scalar lowerThreshold, Scalar upperThreshold) {
-        this.lowerThreshold = lowerThreshold;
-        this.upperThreshold = upperThreshold;
-
-        lowerThreshold2 = null;
-        upperThreshold2 = null;
-    }
-
-    private TeamPropProcessor(Scalar lowerThreshold, Scalar upperThreshold, Scalar lowerThreshold2, Scalar upperThreshold2) {
-        this.lowerThreshold = lowerThreshold;
-        this.upperThreshold = upperThreshold;
-        this.lowerThreshold2 = lowerThreshold2;
-        this.upperThreshold2 = upperThreshold2;
+    private void calculatePixelCounts() {
+        leftPixelCount = (int) ((brLeft.x - tlLeft.x) * (brLeft.y - tlLeft.y));
+        centerPixelCount = (int) ((brCenter.x - tlCenter.x) * (brCenter.y - tlCenter.y));
+        rightPixelCount = (int) ((brRight.x - tlRight.x) * (brRight.y - tlRight.y));
     }
 
     @Override
@@ -123,15 +92,37 @@ public class TeamPropProcessor implements VisionProcessor {
         int centerCount = Core.countNonZero(threshold.submat((int) tlCenter.y, (int) brCenter.y, (int) tlCenter.x, (int) brCenter.x));
         int rightCount = Core.countNonZero(threshold.submat((int) tlRight.y, (int) brRight.y, (int) tlRight.x, (int) brRight.x));
 
-        if (leftCount > centerCount && leftCount > rightCount) {
+//        if (leftCount > centerCount && leftCount > rightCount) {
+//            synchronized (detectionLock) {
+//                detection = Detection.LEFT;
+//            }
+//        } else if (centerCount > leftCount && centerCount > rightCount) {
+//            synchronized (detectionLock) {
+//                detection = Detection.CENTER;
+//            }
+//        } else if (rightCount > leftCount && rightCount > centerCount) {
+//            synchronized (detectionLock) {
+//                detection = Detection.RIGHT;
+//            }
+//        } else {
+//            synchronized (detectionLock) {
+//                detection = Detection.CENTER; // Default to center
+//            }
+//        }
+
+        float leftRatio = (float) leftCount / (float) leftPixelCount;
+        float centerRatio = (float) centerCount / (float) centerPixelCount;
+        float rightRatio = (float) rightCount / (float) rightPixelCount;
+
+        if (leftRatio > centerRatio && leftRatio > rightRatio) {
             synchronized (detectionLock) {
                 detection = Detection.LEFT;
             }
-        } else if (centerCount > leftCount && centerCount > rightCount) {
+        } else if (centerRatio > leftRatio && centerRatio > rightRatio) {
             synchronized (detectionLock) {
                 detection = Detection.CENTER;
             }
-        } else if (rightCount > leftCount && rightCount > centerCount) {
+        } else if (rightRatio > leftRatio && rightRatio > centerRatio) {
             synchronized (detectionLock) {
                 detection = Detection.RIGHT;
             }
@@ -212,6 +203,55 @@ public class TeamPropProcessor implements VisionProcessor {
     public Detection getDetection() {
         synchronized (detectionLock) {
             return detection;
+        }
+    }
+
+    public static class Builder {
+        private Point tlLeft = new Point(0, 0);
+        private Point brLeft = new Point(213, 480);
+        private Point tlCenter = new Point(213, 0);
+        private Point brCenter = new Point(426, 480);
+        private Point tlRight = new Point(426, 0);
+        private Point brRight = new Point(640, 480);
+        private Scalar lowerThreshold = new Scalar(0, 100, 100);
+        private Scalar upperThreshold = new Scalar(10, 255, 255);
+        private Scalar lowerThreshold2 = new Scalar(160, 100, 100);
+        private Scalar upperThreshold2 = new Scalar(179, 255, 255);
+
+        public Builder setLeftBox(Point tlLeft, Point brLeft) {
+            this.tlLeft = tlLeft;
+            this.brLeft = brLeft;
+            return this;
+        }
+
+        public Builder setCenterBox(Point tlCenter, Point brCenter) {
+            this.tlCenter = tlCenter;
+            this.brCenter = brCenter;
+            return this;
+        }
+
+        public Builder setRightBox(Point tlRight, Point brRight) {
+            this.tlRight = tlRight;
+            this.brRight = brRight;
+            return this;
+        }
+
+        public Builder setColor(Scalar lowerThreshold, Scalar upperThreshold) {
+            this.lowerThreshold = lowerThreshold;
+            this.upperThreshold = upperThreshold;
+            return this;
+        }
+
+        public Builder setColor(Scalar lowerThreshold, Scalar upperThreshold, Scalar lowerThreshold2, Scalar upperThreshold2) {
+            this.lowerThreshold = lowerThreshold;
+            this.upperThreshold = upperThreshold;
+            this.lowerThreshold2 = lowerThreshold2;
+            this.upperThreshold2 = upperThreshold2;
+            return this;
+        }
+
+        public TeamPropProcessor build() {
+            return new TeamPropProcessor(tlLeft, brLeft, tlCenter, brCenter, tlRight, brRight, lowerThreshold, upperThreshold, lowerThreshold2, upperThreshold2);
         }
     }
 }

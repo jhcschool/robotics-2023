@@ -6,6 +6,7 @@ import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 
 import org.firstinspires.ftc.teamcode.base.Mode;
+import org.firstinspires.ftc.teamcode.robot.HardwareID;
 
 @TeleOp(name = "Wheel Test", group = "Controlled Tests")
 public class WheelTestMode extends Mode {
@@ -13,7 +14,7 @@ public class WheelTestMode extends Mode {
     private final DcMotorEx[] motors = new DcMotorEx[4];
     private int motorIndex;
 
-    private static String[] MOTOR_NAMES = {"leftFront", "leftBack", "rightBack", "rightFront"};
+    private static String[] MOTOR_NAMES = {HardwareID.LEFT_FRONT_MOTOR, HardwareID.LEFT_BACK_MOTOR, HardwareID.RIGHT_BACK_MOTOR, HardwareID.RIGHT_FRONT_MOTOR};
     private static boolean[] REVERSED = {false, false, false, false};
 
     @Override
@@ -46,9 +47,10 @@ public class WheelTestMode extends Mode {
         for (DcMotorEx motor : motors) {
             motor.setPower(0);
         }
-        motors[motorIndex].setPower(gamepad1.right_trigger - gamepad1.left_trigger);
+        double power = gamepad1.right_trigger - gamepad1.left_trigger;
+        motors[motorIndex].setPower(power);
         telemetry.addData("Motor", MOTOR_NAMES[motorIndex]);
-        telemetry.addData("Motor velocity", motors[motorIndex].getVelocity());
+        telemetry.addData("Power", power);
     }
 
 }

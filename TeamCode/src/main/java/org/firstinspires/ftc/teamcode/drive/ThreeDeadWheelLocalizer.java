@@ -12,6 +12,8 @@ import com.acmerobotics.roadrunner.ftc.RawEncoder;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
+import org.firstinspires.ftc.teamcode.robot.HardwareID;
+
 @Config
 public final class ThreeDeadWheelLocalizer implements Localizer {
     public static class Params {
@@ -29,9 +31,9 @@ public final class ThreeDeadWheelLocalizer implements Localizer {
     private int lastPar0Pos, lastPar1Pos, lastPerpPos;
 
     public ThreeDeadWheelLocalizer(HardwareMap hardwareMap, double inPerTick) {
-        par0 = new RawEncoder(hardwareMap.get(DcMotorEx.class, "leftFront"));
-        par1 = new RawEncoder(hardwareMap.get(DcMotorEx.class, "leftBack"));
-        perp = new RawEncoder(hardwareMap.get(DcMotorEx.class, "rightBack"));
+        par0 = new RawEncoder(hardwareMap.get(DcMotorEx.class, HardwareID.LEFT_FRONT_MOTOR));
+        par1 = new RawEncoder(hardwareMap.get(DcMotorEx.class, HardwareID.LEFT_BACK_MOTOR));
+        perp = new RawEncoder(hardwareMap.get(DcMotorEx.class, HardwareID.RIGHT_BACK_MOTOR));
 
         lastPar0Pos = par0.getPositionAndVelocity().position;
         lastPar1Pos = par1.getPositionAndVelocity().position;

@@ -53,7 +53,7 @@ public class Mode extends LinearOpMode {
             isBeforeStart = false;
         }
         try {
-            beforeStartLoopThread.join(100);
+            beforeStartLoopThread.join(300);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
