@@ -19,7 +19,7 @@ import org.firstinspires.ftc.teamcode.robot.RobotConstraints;
 import org.firstinspires.ftc.vision.VisionPortal;
 import org.firstinspires.ftc.vision.apriltag.AprilTagProcessor;
 
-@Autonomous(name = "Basic Control Test", group = "Autonomous Tests")
+@Autonomous(name = "Trajectory Test", group = "Autonomous Tests")
 public class TrajectoryTestMode extends Mode {
     enum State {
         BEFORE_FLOOR_PLACE,
