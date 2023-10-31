@@ -54,7 +54,7 @@ public class TrajectoryTestMode extends Mode {
         drive = new MecanumDrive(hardwareMap, FieldInfo.getRealPose(START_POSE));
 
         beforeFloorPlace = drive.actionBuilder(FieldInfo.getRealPose(START_POSE))
-                .lineToXLinearHeading(FieldInfo.getRealVector(INTERMITTENT_POSE.position).x, INTERMITTENT_POSE.heading)
+                .strafeToLinearHeading(FieldInfo.getRealVector(INTERMITTENT_POSE.position), INTERMITTENT_POSE.heading)
                 .build();
 
         TrajectoryActionBuilder navigateToFloorPlaceBuilder = drive.actionBuilder(FieldInfo.getRealPose(INTERMITTENT_POSE));
@@ -70,7 +70,7 @@ public class TrajectoryTestMode extends Mode {
 
                 Vector2d endPosition = leftTapePosition.minus(unitVector.times(RobotConstraints.CLAW_LENGTH_FROM_CENTER));
 
-                navigateToFloorPlaceBuilder.lineToXLinearHeading(FieldInfo.getRealVector(endPosition).x, Math.toRadians(135));
+                navigateToFloorPlaceBuilder.strafeToLinearHeading(FieldInfo.getRealVector(endPosition), Math.toRadians(135));
 
                 lastPose = FieldInfo.getRealPose(new Pose2d(leftTapePosition, Math.toRadians(135)));
 
@@ -82,7 +82,7 @@ public class TrajectoryTestMode extends Mode {
 
                 Vector2d endPosition = centerTapePosition.minus(unitVector.times(RobotConstraints.CLAW_LENGTH_FROM_CENTER));
 
-                navigateToFloorPlaceBuilder.lineToXLinearHeading(FieldInfo.getRealVector(endPosition).x, Math.toRadians(90));
+                navigateToFloorPlaceBuilder.strafeToLinearHeading(FieldInfo.getRealVector(endPosition), Math.toRadians(90));
 
                 lastPose = FieldInfo.getRealPose(new Pose2d(centerTapePosition, Math.toRadians(90)));
 
@@ -96,7 +96,7 @@ public class TrajectoryTestMode extends Mode {
 
                 Vector2d endPosition = rightTapePosition.minus(unitVector.times(RobotConstraints.CLAW_LENGTH_FROM_CENTER));
 
-                navigateToFloorPlaceBuilder.lineToXLinearHeading(FieldInfo.getRealVector(endPosition).x, Math.toRadians(45));
+                navigateToFloorPlaceBuilder.strafeToLinearHeading(FieldInfo.getRealVector(endPosition), Math.toRadians(45));
 
                 lastPose = FieldInfo.getRealPose(new Pose2d(rightTapePosition, Math.toRadians(45)));
 
@@ -109,7 +109,7 @@ public class TrajectoryTestMode extends Mode {
         navigateToFloorPlace = navigateToFloorPlaceBuilder.build();
 
         navigateToBackstage = drive.actionBuilder(lastPose)
-                .lineToXLinearHeading(FieldInfo.getRealVector(BACKSTAGE_POSE.position).x, BACKSTAGE_POSE.heading)
+                .strafeToLinearHeading(FieldInfo.getRealVector(BACKSTAGE_POSE.position), BACKSTAGE_POSE.heading)
                 .build();
 
         actionSequence = new SequentialAction(beforeFloorPlace, navigateToFloorPlace, navigateToBackstage);

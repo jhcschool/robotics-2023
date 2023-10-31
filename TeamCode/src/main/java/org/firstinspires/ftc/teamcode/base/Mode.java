@@ -2,8 +2,11 @@ package org.firstinspires.ftc.teamcode.base;
 
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
+import com.qualcomm.hardware.lynx.LynxModule;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+
+import java.util.List;
 
 @Disabled
 public class Mode extends LinearOpMode {
@@ -13,7 +16,12 @@ public class Mode extends LinearOpMode {
     private boolean isBeforeStart = true;
 
     @Override
-    public void runOpMode() {
+    public final void runOpMode() {
+        List<LynxModule> allHubs = hardwareMap.getAll(LynxModule.class);
+        for (LynxModule module : allHubs) {
+            module.setBulkCachingMode(LynxModule.BulkCachingMode.AUTO);
+        }
+
         onInit();
         beforeStart();
         if (isStopRequested()) {
@@ -36,7 +44,7 @@ public class Mode extends LinearOpMode {
         telemetry.update();
     }
 
-    public void beforeStart() {
+    private void beforeStart() {
         beforeStartLoopThread = new Thread(() -> {
             while (true) {
                 synchronized (beforeStartLoopSync) {
