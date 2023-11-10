@@ -1,260 +1,219 @@
 package org.firstinspires.ftc.teamcode.utils;
 
-/*  Taken from FTCLib. For tuning, generally increase kP until the system oscillates,
+import androidx.annotation.Nullable;
+
+/*  Taken from RoadRunner. For tuning, generally increase kP until the system oscillates,
     then adjust kD to dampen the oscillations. Keep kI close to 0 or at 0.
-    If you want to add feed-forward, add a kF value. If not, set kF to 0.
  */
-public class PIDFController {
 
-    private double kP, kI, kD, kF;
-    private double setPoint;
-    private double measuredValue;
-    private double minIntegral, maxIntegral;
+/**
+ * PID controller with various feedforward components.
+ */
+public final class PIDFController {
+    public static final class PIDCoefficients {
+        public double kP, kI, kD;
 
-    private double errorVal_p;
-    private double errorVal_v;
-
-    private double totalError;
-    private double prevErrorVal;
-
-    private double errorTolerance_p = 0.05;
-    private double errorTolerance_v = Double.POSITIVE_INFINITY;
-
-    private double lastTimeStamp;
-    private double period;
-
-    /**
-     * The base constructor for the PIDF controller
-     */
-    public PIDFController(double kp, double ki, double kd, double kf) {
-        this(kp, ki, kd, kf, 0, 0);
+        public PIDCoefficients(double kP, double kI, double kD) {
+            this.kP = kP;
+            this.kI = kI;
+            this.kD = kD;
+        }
     }
 
+    public interface FeedforwardFun {
+        double compute(double position, @Nullable Double velocity);
+    }
+
+    private final PIDCoefficients pid;
+    private final double kV, kA, kStatic;
+    private final FeedforwardFun kF;
+
+    private double errorSum;
+    private long lastUpdateTs;
+
+    private boolean inputBounded;
+    private double minInput, maxInput;
+
+    private boolean outputBounded;
+    private double minOutput, maxOutput;
+
     /**
-     * This is the full constructor for the PIDF controller. Our PIDF controller
-     * includes a feed-forward value which is useful for fighting friction and gravity.
-     * Our errorVal represents the return of e(t) and prevErrorVal is the previous error.
+     * Target position (that is, the controller setpoint).
+     */
+    public double targetPosition;
+
+    /**
+     * Target velocity.
+     */
+    public double targetVelocity;
+
+    /**
+     * Target acceleration.
+     */
+    public double targetAcceleration;
+
+    /**
+     * Error computed in the last call to {@link #update(long, double, Double)}
+     */
+    public double lastError;
+
+    /**
+     * Feedforward parameters {@code kV}, {@code kA}, and {@code kStatic} correspond with a basic
+     * kinematic model of DC motors. The general function {@code kF} computes a custom feedforward
+     * term for other plants.
      *
-     * @param sp The setpoint of the pid control loop.
-     * @param pv The measured value of he pid control loop. We want sp = pv, or to the degree
-     *           such that sp - pv, or e(t) < tolerance.
+     * @param pid     traditional PID coefficients
+     * @param kV      feedforward velocity gain
+     * @param kA      feedforward acceleration gain
+     * @param kStatic additive feedforward constant
+     * @param kF      custom feedforward that depends on position and velocity
      */
-    public PIDFController(double kp, double ki, double kd, double kf, double sp, double pv) {
-        kP = kp;
-        kI = ki;
-        kD = kd;
-        kF = kf;
-
-        setPoint = sp;
-        measuredValue = pv;
-
-        minIntegral = -1.0;
-        maxIntegral = 1.0;
-
-        lastTimeStamp = 0;
-        period = 0;
-
-        errorVal_p = setPoint - measuredValue;
-        reset();
+    public PIDFController(
+            PIDCoefficients pid,
+            double kV,
+            double kA,
+            double kStatic,
+            FeedforwardFun kF
+    ) {
+        this.pid = pid;
+        this.kV = kV;
+        this.kA = kA;
+        this.kStatic = kStatic;
+        this.kF = kF;
     }
 
+    public PIDFController(
+            PIDCoefficients pid,
+            double kV,
+            double kA,
+            double kStatic
+    ) {
+        this(pid, kV, kA, kStatic, (x, v) -> 0);
+    }
+
+    public PIDFController(
+            PIDCoefficients pid,
+            FeedforwardFun kF
+    ) {
+        this(pid, 0, 0, 0, kF);
+    }
+
+    public PIDFController(
+            PIDCoefficients pid
+    ) {
+        this(pid, 0, 0, 0);
+    }
+
+    /**
+     * Sets bound on the input of the controller. When computing the error, the min and max are
+     * treated as the same value. (Imagine taking the segment of the real line between min and max
+     * and attaching the endpoints.)
+     *
+     * @param min minimum input
+     * @param max maximum input
+     */
+    public void setInputBounds(double min, double max) {
+        if (min < max) {
+            inputBounded = true;
+            minInput = min;
+            maxInput = max;
+        }
+    }
+
+    /**
+     * Sets bounds on the output of the controller.
+     *
+     * @param min minimum output
+     * @param max maximum output
+     */
+    public void setOutputBounds(double min, double max) {
+        if (min < max) {
+            outputBounded = true;
+            minOutput = min;
+            maxOutput = max;
+        }
+    }
+
+    private double getPositionError(double measuredPosition) {
+        double error = targetPosition - measuredPosition;
+        if (inputBounded) {
+            final double inputRange = maxInput - minInput;
+            while (Math.abs(error) > inputRange / 2.0) {
+                error -= Math.copySign(inputRange, error);
+            }
+        }
+        return error;
+    }
+
+    /**
+     * Run a single iteration of the controller.
+     *
+     * @param timestamp        measurement timestamp as given by {@link System#nanoTime()}
+     * @param measuredPosition measured position (feedback)
+     * @param measuredVelocity measured velocity
+     */
+    public double update(
+            long timestamp,
+            double measuredPosition,
+            @Nullable Double measuredVelocity
+    ) {
+        final double error = getPositionError(measuredPosition);
+
+        if (lastUpdateTs == 0) {
+            lastError = error;
+            lastUpdateTs = timestamp;
+            return 0;
+        }
+
+        final double dt = timestamp - lastUpdateTs;
+        errorSum += 0.5 * (error + lastError) * dt;
+        final double errorDeriv = (error - lastError) / dt;
+
+        lastError = error;
+        lastUpdateTs = timestamp;
+
+        double velError;
+        if (measuredVelocity == null) {
+            velError = errorDeriv;
+        } else {
+            velError = targetVelocity - measuredVelocity;
+        }
+
+        double baseOutput = pid.kP * error + pid.kI * errorSum + pid.kD * velError +
+                kV * targetVelocity + kA * targetAcceleration +
+                kF.compute(measuredPosition, measuredVelocity);
+
+        double output = 0;
+        if (Math.abs(baseOutput) > 1e-6) {
+            output = baseOutput + Math.copySign(kStatic, baseOutput);
+        }
+
+        if (outputBounded) {
+            return Math.max(minOutput, Math.min(output, maxOutput));
+        }
+
+        return output;
+    }
+
+    public double update(
+            long timestamp,
+            double measuredPosition
+    ) {
+        return update(timestamp, measuredPosition, null);
+    }
+
+    public double update(
+            double measuredPosition
+    ) {
+        return update(System.nanoTime(), measuredPosition, null);
+    }
+
+    /**
+     * Reset the controller's integral sum.
+     */
     public void reset() {
-        totalError = 0;
-        prevErrorVal = 0;
-        lastTimeStamp = 0;
+        errorSum = 0;
+        lastError = 0;
+        lastUpdateTs = 0;
     }
-
-    /**
-     * Sets the error which is considered tolerable for use with {@link #atSetPoint()}.
-     *
-     * @param positionTolerance Position error which is tolerable.
-     */
-    public void setTolerance(double positionTolerance) {
-        setTolerance(positionTolerance, Double.POSITIVE_INFINITY);
-    }
-
-    /**
-     * Sets the error which is considered tolerable for use with {@link #atSetPoint()}.
-     *
-     * @param positionTolerance Position error which is tolerable.
-     * @param velocityTolerance Velocity error which is tolerable.
-     */
-    public void setTolerance(double positionTolerance, double velocityTolerance) {
-        errorTolerance_p = positionTolerance;
-        errorTolerance_v = velocityTolerance;
-    }
-
-    /**
-     * Returns the current setpoint of the PIDFController.
-     *
-     * @return The current setpoint.
-     */
-    public double getSetPoint() {
-        return setPoint;
-    }
-
-    /**
-     * Sets the setpoint for the PIDFController
-     *
-     * @param sp The desired setpoint.
-     */
-    public void setSetPoint(double sp) {
-        setPoint = sp;
-        errorVal_p = setPoint - measuredValue;
-        errorVal_v = (errorVal_p - prevErrorVal) / period;
-    }
-
-    /**
-     * Returns true if the error is within the percentage of the total input range, determined by
-     * {@link #setTolerance}.
-     *
-     * @return Whether the error is within the acceptable bounds.
-     */
-    public boolean atSetPoint() {
-        return Math.abs(errorVal_p) < errorTolerance_p
-                && Math.abs(errorVal_v) < errorTolerance_v;
-    }
-
-    /**
-     * @return the PIDF coefficients
-     */
-    public double[] getCoefficients() {
-        return new double[]{kP, kI, kD, kF};
-    }
-
-    /**
-     * @return the positional error e(t)
-     */
-    public double getPositionError() {
-        return errorVal_p;
-    }
-
-    /**
-     * @return the tolerances of the controller
-     */
-    public double[] getTolerance() {
-        return new double[]{errorTolerance_p, errorTolerance_v};
-    }
-
-    /**
-     * @return the velocity error e'(t)
-     */
-    public double getVelocityError() {
-        return errorVal_v;
-    }
-
-    /**
-     * Calculates the next output of the PIDF controller.
-     *
-     * @return the next output using the current measured value via
-     * {@link #calculate(double)}.
-     */
-    public double calculate() {
-        return calculate(measuredValue);
-    }
-
-    /**
-     * Calculates the next output of the PIDF controller.
-     *
-     * @param pv The given measured value.
-     * @param sp The given setpoint.
-     * @return the next output using the given measurd value via
-     * {@link #calculate(double)}.
-     */
-    public double calculate(double pv, double sp) {
-        // set the setpoint to the provided value
-        setSetPoint(sp);
-        return calculate(pv);
-    }
-
-    /**
-     * Calculates the control value, u(t).
-     *
-     * @param pv The current measurement of the process variable.
-     * @return the value produced by u(t).
-     */
-    public double calculate(double pv) {
-        prevErrorVal = errorVal_p;
-
-        double currentTimeStamp = (double) System.nanoTime() / 1E9;
-        if (lastTimeStamp == 0) lastTimeStamp = currentTimeStamp;
-        period = currentTimeStamp - lastTimeStamp;
-        lastTimeStamp = currentTimeStamp;
-
-        if (measuredValue == pv) {
-            errorVal_p = setPoint - measuredValue;
-        } else {
-            errorVal_p = setPoint - pv;
-            measuredValue = pv;
-        }
-
-        if (Math.abs(period) > 1E-6) {
-            errorVal_v = (errorVal_p - prevErrorVal) / period;
-        } else {
-            errorVal_v = 0;
-        }
-
-        /*
-        if total error is the integral from 0 to t of e(t')dt', and
-        e(t) = sp - pv, then the total error, E(t), equals sp*t - pv*t.
-         */
-        totalError += period * (setPoint - measuredValue);
-        totalError = totalError < minIntegral ? minIntegral : Math.min(maxIntegral, totalError);
-
-        // returns u(t)
-        return kP * errorVal_p + kI * totalError + kD * errorVal_v + kF * setPoint;
-    }
-
-    public void setPIDF(double kp, double ki, double kd, double kf) {
-        kP = kp;
-        kI = ki;
-        kD = kd;
-        kF = kf;
-    }
-
-    public void setIntegrationBounds(double integralMin, double integralMax) {
-        minIntegral = integralMin;
-        maxIntegral = integralMax;
-    }
-
-    public void clearTotalError() {
-        totalError = 0;
-    }
-
-    public void setP(double kp) {
-        kP = kp;
-    }
-
-    public void setI(double ki) {
-        kI = ki;
-    }
-
-    public void setD(double kd) {
-        kD = kd;
-    }
-
-    public void setF(double kf) {
-        kF = kf;
-    }
-
-    public double getP() {
-        return kP;
-    }
-
-    public double getI() {
-        return kI;
-    }
-
-    public double getD() {
-        return kD;
-    }
-
-    public double getF() {
-        return kF;
-    }
-
-    public double getPeriod() {
-        return period;
-    }
-
 }

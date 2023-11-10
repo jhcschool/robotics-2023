@@ -5,6 +5,7 @@ import android.graphics.Color;
 import android.graphics.Paint;
 
 import org.firstinspires.ftc.robotcore.internal.camera.calibration.CameraCalibration;
+import org.firstinspires.ftc.teamcode.game.PropLocation;
 import org.firstinspires.ftc.vision.VisionProcessor;
 import org.opencv.core.Core;
 import org.opencv.core.Mat;
@@ -13,11 +14,6 @@ import org.opencv.core.Scalar;
 import org.opencv.imgproc.Imgproc;
 
 public class TeamPropProcessor implements VisionProcessor {
-    public enum Detection {
-        LEFT,
-        CENTER,
-        RIGHT,
-    }
 
     // with 640 by 480, tlLeft for the left third should be (0, 0), brLeft should be (213, 480), tlCenter should be (213, 0), brCenter should be (426, 480), tlRight should be (426, 0), brRight should be (640, 480). of course, these should be tuned for the actual prop and camera position.
 
@@ -40,7 +36,7 @@ public class TeamPropProcessor implements VisionProcessor {
     private Scalar lowerThreshold2 = new Scalar(160, 100, 100);
     private Scalar upperThreshold2 = new Scalar(179, 255, 255);
 
-    private Detection detection = null;
+    private PropLocation detection = null;
     private Object detectionLock = new Object();
 
     private Mat hsv = new Mat();
@@ -116,19 +112,19 @@ public class TeamPropProcessor implements VisionProcessor {
 
         if (leftRatio > centerRatio && leftRatio > rightRatio) {
             synchronized (detectionLock) {
-                detection = Detection.LEFT;
+                detection = PropLocation.LEFT;
             }
         } else if (centerRatio > leftRatio && centerRatio > rightRatio) {
             synchronized (detectionLock) {
-                detection = Detection.CENTER;
+                detection = PropLocation.CENTER;
             }
         } else if (rightRatio > leftRatio && rightRatio > centerRatio) {
             synchronized (detectionLock) {
-                detection = Detection.RIGHT;
+                detection = PropLocation.RIGHT;
             }
         } else {
             synchronized (detectionLock) {
-                detection = Detection.CENTER; // Default to center
+                detection = PropLocation.CENTER; // Default to center
             }
         }
 
@@ -139,7 +135,7 @@ public class TeamPropProcessor implements VisionProcessor {
     public void onDrawFrame(Canvas canvas, int onscreenWidth, int onscreenHeight, float scaleBmpPxToCanvasPx, float scaleCanvasDensity, Object userContext) {
         // Draw bounding box around location with color based on detection
 
-        Detection detection = getDetection();
+        PropLocation detection = getDetection();
 
         Point tl = null;
         Point br = null;
@@ -200,7 +196,7 @@ public class TeamPropProcessor implements VisionProcessor {
 //        );
     }
 
-    public Detection getDetection() {
+    public PropLocation getDetection() {
         synchronized (detectionLock) {
             return detection;
         }
