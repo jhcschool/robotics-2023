@@ -8,7 +8,7 @@ import org.firstinspires.ftc.teamcode.robot.HardwareID;
 import org.firstinspires.ftc.teamcode.robot.Potentiometer;
 
 public class Arm {
-    private static final double BASE_ANGLE = 0.0;
+    private static final double BASE_ANGLE = Math.toRadians(84.3);
 
     private DcMotorEx armMotor;
     private AnalogInput potentiometer;
@@ -29,7 +29,7 @@ public class Arm {
     }
 
     public double getAngle() {
-        return Math.toRadians(Potentiometer.getArmRotDegrees(potentiometer.getVoltage())) - BASE_ANGLE;
+        return Math.toRadians(270 - Potentiometer.getArmRotDegrees(potentiometer.getVoltage())) - BASE_ANGLE;
     }
 
     public double getAngleDegrees() {

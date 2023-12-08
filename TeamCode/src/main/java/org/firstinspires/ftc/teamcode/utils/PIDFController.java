@@ -24,9 +24,9 @@ public final class PIDFController {
         double compute(double position, @Nullable Double velocity);
     }
 
-    private final PIDCoefficients pid;
-    private final double kV, kA, kStatic;
-    private final FeedforwardFun kF;
+    private PIDCoefficients pid;
+    private double kV, kA, kStatic;
+    private FeedforwardFun kF;
 
     private double errorSum;
     private long lastUpdateTs;
@@ -215,5 +215,19 @@ public final class PIDFController {
         errorSum = 0;
         lastError = 0;
         lastUpdateTs = 0;
+    }
+
+    public void setPIDCoefficients(PIDCoefficients pid) {
+        this.pid = pid;
+    }
+
+    public void setFeedforwardCoefficients(double kV, double kA, double kStatic) {
+        this.kV = kV;
+        this.kA = kA;
+        this.kStatic = kStatic;
+    }
+
+    public void setFeedforwardFun(FeedforwardFun kF) {
+        this.kF = kF;
     }
 }

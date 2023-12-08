@@ -54,6 +54,7 @@ public class ArmPIDTestMode extends Mode {
 
         telemetry.addData("Arm Power", power);
         telemetry.addData("Arm Degrees", arm.getAngleDegrees());
+        telemetry.addData("Arm Target Degrees", Math.toDegrees(armController.getTargetAngle()));
         telemetry.addData("Target Angle", targetAngle);
     }
 }

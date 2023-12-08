@@ -14,12 +14,23 @@ public class Mode extends LinearOpMode {
     private final Object beforeStartLoopSync = new Object();
     private Thread beforeStartLoopThread;
     private boolean isBeforeStart = true;
+    private LynxModule.BulkCachingMode bulkCachingMode = LynxModule.BulkCachingMode.AUTO;
+    private List<LynxModule> allHubs;
+
+    public Mode() {
+        super();
+    }
+
+    public Mode(LynxModule.BulkCachingMode bulkCachingMode) {
+        super();
+        this.bulkCachingMode = bulkCachingMode;
+    }
 
     @Override
     public final void runOpMode() {
-        List<LynxModule> allHubs = hardwareMap.getAll(LynxModule.class);
+        allHubs = hardwareMap.getAll(LynxModule.class);
         for (LynxModule module : allHubs) {
-            module.setBulkCachingMode(LynxModule.BulkCachingMode.AUTO);
+            module.setBulkCachingMode(bulkCachingMode);
         }
 
         onInit();
@@ -84,5 +95,11 @@ public class Mode extends LinearOpMode {
     public void onEnd() {
         telemetry.addData("Status", "Ended");
         telemetry.update();
+    }
+
+    protected void clearBulkCache() {
+        for (LynxModule module : allHubs) {
+            module.clearBulkCache();
+        }
     }
 }

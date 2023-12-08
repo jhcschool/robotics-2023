@@ -11,7 +11,9 @@ import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.teamcode.arm.Arm;
+import org.firstinspires.ftc.teamcode.autonomous.v1.WristSystem;
 import org.firstinspires.ftc.teamcode.base.Mode;
+import org.firstinspires.ftc.teamcode.claw.Claw;
 import org.firstinspires.ftc.teamcode.drive.MecanumDrive;
 import org.firstinspires.ftc.teamcode.input.Axis;
 import org.firstinspires.ftc.teamcode.input.Button;
@@ -29,7 +31,8 @@ public class BasicControlled extends Mode {
     private GrizzlyGamepad gamepad;
     private MecanumDrive drive;
     private Arm arm;
-    private Servo clawServo;
+    private Claw claw;
+    private WristSystem wristSystem;
 
     @Override
     public void onInit() {
@@ -39,9 +42,8 @@ public class BasicControlled extends Mode {
         drive = new MecanumDrive(hardwareMap, new Pose2d(0, 0, 0));
 
         arm = new Arm(hardwareMap);
-
-        clawServo = hardwareMap.get(Servo.class, "clawServo");
-        clawServo.setPosition(INITIAL_CLAW_POSITION);
+        claw = new Claw(hardwareMap);
+        wristSystem = new WristSystem(hardwareMap);
     }
 
     private ElapsedTime timer = new ElapsedTime();
@@ -70,14 +72,26 @@ public class BasicControlled extends Mode {
         double power = gamepad.getAxis(Axis.RIGHT_TRIGGER) - gamepad.getAxis(Axis.LEFT_TRIGGER);
         arm.setPower(power);
 
+        double angle = arm.getAngle();
+
         telemetry.addData("Arm Power", power);
-        telemetry.addData("Arm Angle", arm.getAngleDegrees());
+        telemetry.addData("Arm Angle", Math.toDegrees(angle));
+
+        wristSystem.update(angle);
 
         if (gamepad.getButtonAction(Button.RIGHT_BUMPER) == ButtonAction.PRESS) {
             clawOpen = !clawOpen;
-            clawServo.setPosition(clawOpen ? INITIAL_CLAW_POSITION : FINAL_CLAW_POSITION);
+
+            if (clawOpen) {
+                claw.openLeft();
+                claw.openRight();
+            } else {
+                claw.closeLeft();
+                claw.closeRight();
+            }
         }
 
         telemetry.addData("Claw Open", clawOpen);
+        telemetry.addData("Wrist Angle", wristSystem.getWrist().getAngleDegrees());
     }
 }

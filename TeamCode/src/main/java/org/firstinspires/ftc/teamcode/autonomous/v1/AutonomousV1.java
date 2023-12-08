@@ -4,6 +4,7 @@ import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.acmerobotics.roadrunner.Action;
 import com.acmerobotics.roadrunner.Pose2d;
 import com.acmerobotics.roadrunner.SequentialAction;
+import com.qualcomm.hardware.lynx.LynxModule;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
@@ -25,8 +26,14 @@ public class AutonomousV1 extends Mode {
 
     private MecanumDrive drive;
     private TrajectoryRepo trajectoryRepo;
-    private VisionSystem visionSystem = new VisionSystem();
+    private VisionSystem visionSystem;
+    private ArmSystem armSystem;
+    private WristSystem wristSystem;
     private Action action;
+
+    public AutonomousV1() {
+        super(LynxModule.BulkCachingMode.AUTO); // TODO: change to MANUAL
+    }
 
     @Override
     public void onInit() {
@@ -34,6 +41,10 @@ public class AutonomousV1 extends Mode {
 
         gamepad = new GrizzlyGamepad(gamepad1);
         drive = new MecanumDrive(hardwareMap, new Pose2d(0, 0, 0));
+
+        visionSystem = new VisionSystem();
+        armSystem = new ArmSystem(hardwareMap);
+        wristSystem = new WristSystem(hardwareMap);
     }
 
     @Override
@@ -85,11 +96,26 @@ public class AutonomousV1 extends Mode {
 
         visionSystem.stopStreaming();
 
+        Action toFirstBackdrop = new SequentialAction(
+                trajectoryRepo.toFirstBackdrop(visionSystem.getPropLocation()),
+                armSystem.raiseArm()
+        );
+
+        Action toFirstPixelStack = new SequentialAction(
+                trajectoryRepo.toFirstPixelStack(),
+                armSystem.lowerArm()
+        );
+
+        Action toCycleBackdrop = new SequentialAction(
+                trajectoryRepo.toCycleBackdrop(),
+                armSystem.raiseArm()
+        );
+
         action = new SequentialAction(
                 trajectoryRepo.toFloorPlace(visionSystem.getPropLocation()),
-                trajectoryRepo.toFirstBackdrop(visionSystem.getPropLocation()),
-                trajectoryRepo.toFirstPixelStack(),
-                trajectoryRepo.toCycleBackdrop()
+                toFirstBackdrop,
+                toFirstPixelStack,
+                toCycleBackdrop
         );
     }
 
@@ -102,6 +128,7 @@ public class AutonomousV1 extends Mode {
 
         drive.updatePoseEstimate();
         action.run(packet);
+        wristSystem.update(armSystem.getAngleFromBase());
 
         telemetry.addData("Pose", drive.pose);
         telemetry.addData("Prop Location", visionSystem.getPropLocation());

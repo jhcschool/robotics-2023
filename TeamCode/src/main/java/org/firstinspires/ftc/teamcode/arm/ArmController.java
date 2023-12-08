@@ -10,12 +10,13 @@ import org.firstinspires.ftc.teamcode.utils.PIDFController;
 public class ArmController {
 
     private static PIDFController.PIDCoefficients PID_COEFFICIENTS = new PIDFController.PIDCoefficients(0.0, 0.0, 0.0);
-    private static double FEEDFORWARD_COEFFICIENT = 1.0;
+    private static double K_STATIC = 0.0;
+    private static double GRAVITY_COEFFICIENT = 0.3;
 
     private PIDFController pidfController;
 
     public ArmController() {
-        pidfController = new PIDFController(PID_COEFFICIENTS, ArmController::feedforward);
+        pidfController = new PIDFController(PID_COEFFICIENTS, 0, 0, K_STATIC, ArmController::feedforward);
     }
 
     public void setTargetAngle(double targetAngle) {
@@ -31,10 +32,19 @@ public class ArmController {
     }
 
     public double update(double currentAngle) {
+        // For tuning with dashboard
+        pidfController.setPIDCoefficients(PID_COEFFICIENTS);
+        pidfController.setFeedforwardCoefficients(0, 0, K_STATIC);
+
         return pidfController.update(currentAngle);
     }
 
+    public double getTargetAngle() {
+        return pidfController.targetPosition;
+    }
+
+
     private static double feedforward(double angle, @Nullable Double velocity) {
-        return FEEDFORWARD_COEFFICIENT * Math.cos(angle);
+        return GRAVITY_COEFFICIENT * Math.cos(angle);
     }
 }
