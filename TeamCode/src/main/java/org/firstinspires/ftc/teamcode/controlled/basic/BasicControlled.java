@@ -20,19 +20,19 @@ import org.firstinspires.ftc.teamcode.input.Button;
 import org.firstinspires.ftc.teamcode.input.ButtonAction;
 import org.firstinspires.ftc.teamcode.input.GrizzlyGamepad;
 import org.firstinspires.ftc.teamcode.robot.HardwareID;
+import org.firstinspires.ftc.teamcode.wrist.Wrist;
+import org.firstinspires.ftc.teamcode.wrist.WristController;
 
 @TeleOp(name = "Basic Controlled", group = "Controlled")
 public class BasicControlled extends Mode {
-
-    private static final double INITIAL_CLAW_POSITION = 0.5;
-    private static final double FINAL_CLAW_POSITION = 0.35;
 
     private boolean clawOpen = true;
     private GrizzlyGamepad gamepad;
     private MecanumDrive drive;
     private Arm arm;
     private Claw claw;
-    private WristSystem wristSystem;
+    private Wrist wrist;
+    private WristController wristController;
 
     @Override
     public void onInit() {
@@ -43,7 +43,8 @@ public class BasicControlled extends Mode {
 
         arm = new Arm(hardwareMap);
         claw = new Claw(hardwareMap);
-        wristSystem = new WristSystem(hardwareMap);
+        wrist = new Wrist(hardwareMap);
+        wristController = new WristController(wrist);
     }
 
     private ElapsedTime timer = new ElapsedTime();
@@ -77,7 +78,7 @@ public class BasicControlled extends Mode {
         telemetry.addData("Arm Power", power);
         telemetry.addData("Arm Angle", Math.toDegrees(angle));
 
-        wristSystem.update(angle);
+        wristController.update(angle);
 
         if (gamepad.getButtonAction(Button.RIGHT_BUMPER) == ButtonAction.PRESS) {
             clawOpen = !clawOpen;
@@ -92,6 +93,6 @@ public class BasicControlled extends Mode {
         }
 
         telemetry.addData("Claw Open", clawOpen);
-        telemetry.addData("Wrist Angle", wristSystem.getWrist().getAngleDegrees());
+        telemetry.addData("Wrist Angle", wrist.getAngleDegrees());
     }
 }

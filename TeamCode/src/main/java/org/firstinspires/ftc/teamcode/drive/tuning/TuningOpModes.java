@@ -31,6 +31,7 @@ import java.util.Arrays;
 import java.util.List;
 
 public final class TuningOpModes {
+    // TODO: change this to TankDrive.class if you're using tank
     public static final Class<?> DRIVE_CLASS = MecanumDrive.class;
 
     public static final String GROUP = "quickstart";
@@ -98,7 +99,7 @@ public final class TuningOpModes {
                         perpEncs,
                         md.imu,
                         md.voltageSensor,
-                        new MotorFeedforward(MecanumDrive.PARAMS.kS,
+                        () -> new MotorFeedforward(MecanumDrive.PARAMS.kS,
                                 MecanumDrive.PARAMS.kV / MecanumDrive.PARAMS.inPerTick,
                                 MecanumDrive.PARAMS.kA / MecanumDrive.PARAMS.inPerTick)
                 );
@@ -141,7 +142,7 @@ public final class TuningOpModes {
                         perpEncs,
                         td.imu,
                         td.voltageSensor,
-                        new MotorFeedforward(TankDrive.PARAMS.kS,
+                        () -> new MotorFeedforward(TankDrive.PARAMS.kS,
                                 TankDrive.PARAMS.kV / TankDrive.PARAMS.inPerTick,
                                 TankDrive.PARAMS.kA / TankDrive.PARAMS.inPerTick)
                 );
@@ -160,6 +161,7 @@ public final class TuningOpModes {
 
         manager.register(metaForClass(ManualFeedbackTuner.class), ManualFeedbackTuner.class);
         manager.register(metaForClass(SplineTest.class), SplineTest.class);
+        manager.register(metaForClass(TurnTest.class), TurnTest.class);
         manager.register(metaForClass(LocalizationTest.class), LocalizationTest.class);
 
         FtcDashboard.getInstance().withConfigRoot(configRoot -> {

@@ -8,8 +8,7 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import org.firstinspires.ftc.teamcode.drive.MecanumDrive;
 import org.firstinspires.ftc.teamcode.drive.TankDrive;
 
-public final class ManualFeedbackTuner extends LinearOpMode {
-    public static double DISTANCE = 64;
+public final class TurnTest extends LinearOpMode {
 
     @Override
     public void runOpMode() throws InterruptedException {
@@ -18,25 +17,23 @@ public final class ManualFeedbackTuner extends LinearOpMode {
 
             waitForStart();
 
-            while (opModeIsActive()) {
-                Actions.runBlocking(
-                        drive.actionBuilder(new Pose2d(0, 0, 0))
-                                .strafeTo(new Vector2d(0, DISTANCE))
-                                .strafeTo(new Vector2d(0, 0))
-                                .build());
-            }
+            Actions.runBlocking(
+                    drive.actionBuilder(drive.pose)
+                            .turn(Math.toRadians(360))
+                            .waitSeconds(1)
+                            .turn(Math.toRadians(360))
+                            .build());
         } else if (TuningOpModes.DRIVE_CLASS.equals(TankDrive.class)) {
             TankDrive drive = new TankDrive(hardwareMap, new Pose2d(0, 0, 0));
 
             waitForStart();
 
-            while (opModeIsActive()) {
-                Actions.runBlocking(
-                        drive.actionBuilder(new Pose2d(0, 0, 0))
-                                .lineToX(DISTANCE)
-                                .lineToX(0)
-                                .build());
-            }
+            Actions.runBlocking(
+                    drive.actionBuilder(drive.pose)
+                            .turn(Math.toRadians(360))
+                            .waitSeconds(1)
+                            .turn(Math.toRadians(360))
+                            .build());
         } else {
             throw new AssertionError();
         }

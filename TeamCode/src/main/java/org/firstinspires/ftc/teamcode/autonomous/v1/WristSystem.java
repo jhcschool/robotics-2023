@@ -17,8 +17,4 @@ public class WristSystem {
     public void update(double armAngleFromBase) {
         wristController.update(armAngleFromBase);
     }
-
-    public Wrist getWrist() {
-        return wrist;
-    }
 }
