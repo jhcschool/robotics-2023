@@ -6,15 +6,18 @@ import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.acmerobotics.roadrunner.Action;
 import com.qualcomm.robotcore.hardware.HardwareMap;
+import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.teamcode.arm.Arm;
 import org.firstinspires.ftc.teamcode.arm.ArmController;
+import org.firstinspires.ftc.teamcode.wrist.WristController;
 
 @Config
 public class ArmSystem {
-    private static double RAISED_ANGLE = Math.toRadians(135);
-    private static double BASE_ANGLE = Math.toRadians(0);
-    private static double ERROR_THRESHOLD = Math.toRadians(5);
+    public static double RAISED_ANGLE = Math.toRadians(130);
+    private static final double BASE_ANGLE = -WristController.ARM_ANGLE_BASE_TO_LEVEL;
+    public static double ERROR_THRESHOLD = Math.toRadians(10);
+    public static double OSCILLATION_TIME = 0.2;
 
     private Arm arm;
 
@@ -24,6 +27,7 @@ public class ArmSystem {
 
     private class ArmAction implements Action {
         private ArmController armController;
+        private ElapsedTime timeSinceHit = null;
 
         public ArmAction(double targetAngle) {
             armController = new ArmController();
@@ -32,12 +36,16 @@ public class ArmSystem {
 
         @Override
         public boolean run(@NonNull TelemetryPacket telemetryPacket) {
-            if (Math.abs(armController.getTargetAngle() - arm.getAngle()) < ERROR_THRESHOLD) {
+            if (timeSinceHit != null && timeSinceHit.seconds() > OSCILLATION_TIME) {
                 arm.setPower(0.0);
                 return false;
             }
 
-            arm.setPower(armController.update(arm.getAngle()));
+            if (Math.abs(armController.getTargetAngle() - arm.getAngle()) < ERROR_THRESHOLD) {
+                timeSinceHit = new ElapsedTime();
+            }
+
+            arm.setPower(armController.update(arm.getAngle()) * 0.7);
             return true;
         }
     }

@@ -9,9 +9,9 @@ import org.firstinspires.ftc.teamcode.utils.PIDFController;
 @Config
 public class ArmController {
 
-    private static PIDFController.PIDCoefficients PID_COEFFICIENTS = new PIDFController.PIDCoefficients(0.0, 0.0, 0.0);
-    private static double K_STATIC = 0.0;
-    private static double GRAVITY_COEFFICIENT = 0.3;
+    public static PIDFController.PIDCoefficients PID_COEFFICIENTS = new PIDFController.PIDCoefficients(0.62, 0.0, 1e6);
+    public static double K_STATIC = 0.0;
+    public static double GRAVITY_COEFFICIENT = 0.13;
 
     private PIDFController pidfController;
 

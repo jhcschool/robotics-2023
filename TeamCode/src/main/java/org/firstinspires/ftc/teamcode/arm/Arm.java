@@ -8,7 +8,7 @@ import org.firstinspires.ftc.teamcode.robot.HardwareID;
 import org.firstinspires.ftc.teamcode.robot.Potentiometer;
 
 public class Arm {
-    private static final double BASE_ANGLE = Math.toRadians(84.3);
+    private static final double BASE_ANGLE = Math.toRadians(39);
 
     private DcMotorEx armMotor;
     private AnalogInput potentiometer;

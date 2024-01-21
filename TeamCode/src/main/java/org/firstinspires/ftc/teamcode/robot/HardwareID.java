@@ -8,4 +8,6 @@ public class HardwareID {
     public static final String RIGHT_FRONT_MOTOR = "rightFront";
     public static final String ARM_POTENTIOMETER = "armPotentiometer";
     public static final String ARM_MOTOR = "armMotor";
+    public static final String LEFT_CLAW = "leftClaw";
+    public static final String RIGHT_CLAW = "rightClaw";
 }

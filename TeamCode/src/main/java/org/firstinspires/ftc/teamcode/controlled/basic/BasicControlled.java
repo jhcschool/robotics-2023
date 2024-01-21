@@ -33,6 +33,14 @@ public class BasicControlled extends Mode {
     private Claw claw;
     private Wrist wrist;
     private WristController wristController;
+    private boolean clamp = false;
+
+    private enum ControlReferenceMode {
+        ROBOT,
+        FIELD
+    }
+
+    private ControlReferenceMode controlReferenceMode = ControlReferenceMode.FIELD;
 
     @Override
     public void onInit() {
@@ -44,7 +52,11 @@ public class BasicControlled extends Mode {
         arm = new Arm(hardwareMap);
         claw = new Claw(hardwareMap);
         wrist = new Wrist(hardwareMap);
+        wrist.setAngle(0);
         wristController = new WristController(wrist);
+
+        claw.openLeft();
+        claw.openRight();
     }
 
     private ElapsedTime timer = new ElapsedTime();
@@ -61,7 +73,14 @@ public class BasicControlled extends Mode {
         float right = -gamepad.getAxis(Axis.LEFT_STICK_X);
         float rotation = -gamepad.getAxis(Axis.RIGHT_STICK_X);
 
-        PoseVelocity2d powers = new PoseVelocity2d(new Vector2d(forward, right), rotation);
+        PoseVelocity2d powers;
+        if (controlReferenceMode == ControlReferenceMode.FIELD) {
+            Vector2d nonRotated = new Vector2d(forward, right);
+            powers = new PoseVelocity2d(drive.pose.heading.inverse().times(nonRotated), rotation);
+        } else {
+            powers = new PoseVelocity2d(new Vector2d(forward, right), rotation);
+        }
+
         drive.setDrivePowers(powers);
 
         double time = timer.seconds();
@@ -92,7 +111,26 @@ public class BasicControlled extends Mode {
             }
         }
 
+        if (gamepad.getButtonAction(Button.A) == ButtonAction.PRESS) {
+            int newValue = controlReferenceMode.ordinal() + 1;
+            if (newValue >= ControlReferenceMode.values().length) {
+                newValue = 0;
+            }
+
+            controlReferenceMode = ControlReferenceMode.values()[newValue];
+        }
+
+        if (gamepad.getButton(Button.Y) && gamepad.getButton(Button.DPAD_UP)) {
+            clamp = !clamp;
+        }
+
+        if (clamp) {
+            arm.setPower(-1.0);
+        }
+
         telemetry.addData("Claw Open", clawOpen);
         telemetry.addData("Wrist Angle", wrist.getAngleDegrees());
+
+        telemetry.addData("Control Reference Mode", controlReferenceMode);
     }
 }

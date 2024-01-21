@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode.autonomous.v1;
 
 import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.acmerobotics.roadrunner.Action;
+import com.acmerobotics.roadrunner.ParallelAction;
 import com.acmerobotics.roadrunner.Pose2d;
 import com.acmerobotics.roadrunner.SequentialAction;
 import com.qualcomm.hardware.lynx.LynxModule;
@@ -29,11 +30,8 @@ public class AutonomousV1 extends Mode {
     private VisionSystem visionSystem;
     private ArmSystem armSystem;
     private WristSystem wristSystem;
+    private ClawSystem clawSystem;
     private Action action;
-
-    public AutonomousV1() {
-        super(LynxModule.BulkCachingMode.AUTO); // TODO: change to MANUAL
-    }
 
     @Override
     public void onInit() {
@@ -45,6 +43,7 @@ public class AutonomousV1 extends Mode {
         visionSystem = new VisionSystem();
         armSystem = new ArmSystem(hardwareMap);
         wristSystem = new WristSystem(hardwareMap);
+        clawSystem = new ClawSystem(hardwareMap);
     }
 
     @Override
@@ -61,27 +60,26 @@ public class AutonomousV1 extends Mode {
                 allianceColor = AllianceColor.BLUE;
             }
 
-            if (!gamepad.getButton(Button.X)) {
-                return;
+            if (gamepad.getButton(Button.X)) {
+                telemetry.clearAll();
+                telemetry.addData("Alliance", allianceColor.toString());
+
+                confirmedAlliance = true;
+                initForAlliance();
             }
-
-            telemetry.clearAll();
-            telemetry.addData("Alliance", allianceColor.toString());
-
-            confirmedAlliance = true;
-            initForAlliance();
         }
 
         drive.updatePoseEstimate();
         visionSystem.update();
     }
 
-    void initForAlliance() {
+    public void initForAlliance() {
         switch (allianceColor) {
             case RED:
                 trajectoryRepo = new RedTrajectoryRepo(drive);
                 break;
             case BLUE:
+                trajectoryRepo = new BlueTrajectoryRepo(drive);
                 break;
         }
 
@@ -96,26 +94,27 @@ public class AutonomousV1 extends Mode {
 
         visionSystem.stopStreaming();
 
+        Action clawClose = new ParallelAction(
+                clawSystem.closeLeft(),
+                clawSystem.closeRight()
+        );
+
+        Action toFloorPlace = new SequentialAction(
+                trajectoryRepo.toFloorPlace(visionSystem.getPropLocation()),
+                clawSystem.openLeft()
+        );
+
         Action toFirstBackdrop = new SequentialAction(
-                trajectoryRepo.toFirstBackdrop(visionSystem.getPropLocation()),
-                armSystem.raiseArm()
-        );
-
-        Action toFirstPixelStack = new SequentialAction(
-                trajectoryRepo.toFirstPixelStack(),
-                armSystem.lowerArm()
-        );
-
-        Action toCycleBackdrop = new SequentialAction(
-                trajectoryRepo.toCycleBackdrop(),
-                armSystem.raiseArm()
-        );
+                new ParallelAction(
+                        trajectoryRepo.toFirstBackdrop(visionSystem.getPropLocation()),
+                        armSystem.raiseArm()
+                ),
+                clawSystem.openRight());
 
         action = new SequentialAction(
-                trajectoryRepo.toFloorPlace(visionSystem.getPropLocation()),
-                toFirstBackdrop,
-                toFirstPixelStack,
-                toCycleBackdrop
+                clawClose,
+                toFloorPlace,
+                toFirstBackdrop
         );
     }
 

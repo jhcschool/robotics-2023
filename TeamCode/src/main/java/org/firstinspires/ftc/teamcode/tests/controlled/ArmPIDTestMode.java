@@ -16,7 +16,7 @@ import org.firstinspires.ftc.teamcode.input.GrizzlyGamepad;
 public class ArmPIDTestMode extends Mode {
     private Arm arm;
     private ArmController armController;
-    private double targetAngle = 0.0;
+    private double targetAngle = 20.0;
     private GrizzlyGamepad gamepad;
 
     @Override
@@ -26,7 +26,7 @@ public class ArmPIDTestMode extends Mode {
         arm = new Arm(hardwareMap);
         armController = new ArmController();
 
-        armController.setTargetAngle(targetAngle);
+        armController.setTargetAngle(Math.toRadians(targetAngle));
 
         gamepad = new GrizzlyGamepad(gamepad1);
     }
@@ -41,7 +41,7 @@ public class ArmPIDTestMode extends Mode {
         arm.setPower(power);
 
         if (gamepad.getButtonAction(Button.A) == ButtonAction.PRESS) {
-            armController.setTargetAngle(targetAngle);
+            armController.setTargetAngle(Math.toRadians(targetAngle));
         }
 
         if (gamepad.getButtonAction(Button.DPAD_UP) == ButtonAction.PRESS) {
