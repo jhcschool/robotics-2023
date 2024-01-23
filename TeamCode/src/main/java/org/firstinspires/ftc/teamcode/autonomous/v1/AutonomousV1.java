@@ -9,6 +9,7 @@ import com.qualcomm.hardware.lynx.LynxModule;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
+import org.firstinspires.ftc.teamcode.actions.DelayedAction;
 import org.firstinspires.ftc.teamcode.base.Mode;
 import org.firstinspires.ftc.teamcode.drive.MecanumDrive;
 import org.firstinspires.ftc.teamcode.game.AllianceColor;
@@ -92,6 +93,11 @@ public class AutonomousV1 extends Mode {
     public void onStart() {
         super.onStart();
 
+        if (!confirmedAlliance) {
+            initForAlliance(); // Shouldn't happen, but just in case
+            return;
+        }
+
         visionSystem.stopStreaming();
 
         Action clawClose = new ParallelAction(
@@ -107,7 +113,7 @@ public class AutonomousV1 extends Mode {
         Action toFirstBackdrop = new SequentialAction(
                 new ParallelAction(
                         trajectoryRepo.toFirstBackdrop(visionSystem.getPropLocation()),
-                        armSystem.raiseArm()
+                        new DelayedAction(0.3, armSystem.raiseArm())
                 ),
                 clawSystem.openRight());
 
@@ -127,7 +133,9 @@ public class AutonomousV1 extends Mode {
 
         drive.updatePoseEstimate();
         action.run(packet);
-        wristSystem.update(armSystem.getAngleFromBase());
+
+        double angle = armSystem.getAngle();
+        wristSystem.update(angle);
 
         telemetry.addData("Pose", drive.pose);
         telemetry.addData("Prop Location", visionSystem.getPropLocation());
@@ -135,6 +143,8 @@ public class AutonomousV1 extends Mode {
         double currentTime = timer.seconds();
         telemetry.addData("Loop Time", currentTime - lastTime);
         lastTime = currentTime;
+
+        telemetry.addData("Arm Angle", Math.toDegrees(angle));
     }
 
 }

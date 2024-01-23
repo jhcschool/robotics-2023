@@ -18,6 +18,8 @@ public class ArmSystem {
     private static final double BASE_ANGLE = -WristController.ARM_ANGLE_BASE_TO_LEVEL;
     public static double ERROR_THRESHOLD = Math.toRadians(10);
     public static double OSCILLATION_TIME = 0.2;
+    public static double POWER_MULTIPLIER = 0.7;
+    public static double MAX_POWER = 0.7;
 
     private Arm arm;
 
@@ -45,7 +47,10 @@ public class ArmSystem {
                 timeSinceHit = new ElapsedTime();
             }
 
-            arm.setPower(armController.update(arm.getAngle()) * 0.7);
+            double power = armController.update(arm.getAngle()) * POWER_MULTIPLIER;
+            power = Math.min(Math.abs(power), MAX_POWER) * Math.signum(power);
+
+            arm.setPower(power);
             return true;
         }
     }
@@ -60,9 +65,5 @@ public class ArmSystem {
 
     public double getAngle() {
         return arm.getAngle();
-    }
-
-    public double getAngleFromBase() {
-        return arm.getAngle() - BASE_ANGLE;
     }
 }

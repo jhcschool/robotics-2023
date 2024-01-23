@@ -13,8 +13,8 @@ import org.firstinspires.ftc.teamcode.robot.RobotConstraints;
 public class BlueTrajectoryRepo implements TrajectoryRepo {
     private MecanumDrive drive;
     private static final Pose2d START_POSE = new Pose2d(12, 72 - RobotConstraints.LENGTH_FROM_CENTER, Math.toRadians(270));
-    private Pose2d floorPlacePose = new Pose2d(12, 24.5 + RobotConstraints.CLAW_LENGTH_FROM_CENTER, Math.toRadians(270));
-    private static final Pose2d CENTER_BACKDROP_POSE = new Pose2d(60 - RobotConstraints.OUTPUT_LENGTH_FROM_CENTER, 36 - RobotConstraints.LEFT_CLAW_WIDTH_FROM_CENTER, Math.toRadians(180));
+    private Pose2d floorPlacePose;
+    private static final Pose2d CENTER_BACKDROP_POSE = new Pose2d(60 - RobotConstraints.OUTPUT_LENGTH_FROM_CENTER, 36 + RobotConstraints.RIGHT_CLAW_WIDTH_FROM_CENTER, Math.toRadians(180));
     private Pose2d firstBackdropPose = CENTER_BACKDROP_POSE;
     private static final Pose2d PIXEL_STACK_POSE = new Pose2d(-70 + RobotConstraints.CLAW_LENGTH_FROM_CENTER, 36, Math.toRadians(180));
 
@@ -31,20 +31,20 @@ public class BlueTrajectoryRepo implements TrajectoryRepo {
     public Action toFloorPlace(PropLocation propLocation) {
         switch (propLocation) {
             case LEFT: {
-                floorPlacePose = new Pose2d(23.25 + RobotConstraints.RIGHT_CLAW_WIDTH_FROM_CENTER, floorPlacePose.position.y - RobotConstraints.CLAW_LENGTH_FROM_CENTER, Math.toRadians(0));
+                floorPlacePose = new Pose2d(0.75 + RobotConstraints.CLAW_LENGTH_FROM_CENTER, 24.75 + RobotConstraints.LEFT_CLAW_WIDTH_FROM_CENTER, Math.toRadians(180));
                 break;
             }
             case CENTER: {
+                floorPlacePose = new Pose2d(12 + RobotConstraints.CLAW_LENGTH_FROM_CENTER, 24.75 + RobotConstraints.LEFT_CLAW_WIDTH_FROM_CENTER, Math.toRadians(180));
                 break;
             }
             case RIGHT: {
-                floorPlacePose = new Pose2d(23.25 + RobotConstraints.RIGHT_CLAW_WIDTH_FROM_CENTER, floorPlacePose.position.y, Math.toRadians(180));
+                floorPlacePose = new Pose2d(23.25 + RobotConstraints.RIGHT_CLAW_WIDTH_FROM_CENTER, 24.75 + RobotConstraints.LEFT_CLAW_WIDTH_FROM_CENTER, Math.toRadians(180));
                 break;
             }
         }
 
         return drive.actionBuilder(FieldInfo.getRealPose(START_POSE))
-//                .turnTo(floorPlacePose.heading)
                 .strafeToLinearHeading(FieldInfo.getRealPose(floorPlacePose).position, floorPlacePose.heading)
                 .build();
     }
@@ -53,20 +53,19 @@ public class BlueTrajectoryRepo implements TrajectoryRepo {
     public Action toFirstBackdrop(PropLocation propLocation) {
         switch (propLocation) {
             case LEFT: {
-                firstBackdropPose = new Pose2d(firstBackdropPose.position.x, 29.5 - RobotConstraints.LEFT_CLAW_WIDTH_FROM_CENTER, Math.toRadians(180));
+                firstBackdropPose = new Pose2d(firstBackdropPose.position.x, 29.5 + RobotConstraints.RIGHT_CLAW_WIDTH_FROM_CENTER, Math.toRadians(180));
                 break;
             }
             case CENTER: {
                 break;
             }
             case RIGHT: {
-                firstBackdropPose = new Pose2d(firstBackdropPose.position.x, 42.5 - RobotConstraints.LEFT_CLAW_WIDTH_FROM_CENTER, Math.toRadians(180));
+                firstBackdropPose = new Pose2d(firstBackdropPose.position.x, 42.5 + RobotConstraints.RIGHT_CLAW_WIDTH_FROM_CENTER, Math.toRadians(180));
                 break;
             }
         }
 
         return drive.actionBuilder(FieldInfo.getRealPose(floorPlacePose))
-//                .strafeTo(FieldInfo.getRealVector(new Vector2d(12, 36)))
                 .strafeToLinearHeading(FieldInfo.getRealVector(firstBackdropPose.position), firstBackdropPose.heading)
                 .build();
     }
