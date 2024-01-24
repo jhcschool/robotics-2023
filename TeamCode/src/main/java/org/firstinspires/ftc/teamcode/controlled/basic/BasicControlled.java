@@ -5,13 +5,9 @@ import com.acmerobotics.roadrunner.Pose2d;
 import com.acmerobotics.roadrunner.PoseVelocity2d;
 import com.acmerobotics.roadrunner.Vector2d;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-import com.qualcomm.robotcore.hardware.DcMotorEx;
-import com.qualcomm.robotcore.hardware.DcMotorSimple;
-import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.teamcode.arm.Arm;
-import org.firstinspires.ftc.teamcode.autonomous.v1.WristSystem;
 import org.firstinspires.ftc.teamcode.base.Mode;
 import org.firstinspires.ftc.teamcode.claw.Claw;
 import org.firstinspires.ftc.teamcode.drive.MecanumDrive;
@@ -19,7 +15,6 @@ import org.firstinspires.ftc.teamcode.input.Axis;
 import org.firstinspires.ftc.teamcode.input.Button;
 import org.firstinspires.ftc.teamcode.input.ButtonAction;
 import org.firstinspires.ftc.teamcode.input.GrizzlyGamepad;
-import org.firstinspires.ftc.teamcode.robot.HardwareID;
 import org.firstinspires.ftc.teamcode.wrist.Wrist;
 import org.firstinspires.ftc.teamcode.wrist.WristController;
 
@@ -34,6 +29,7 @@ public class BasicControlled extends Mode {
     private Wrist wrist;
     private WristController wristController;
     private boolean clamp = false;
+    private boolean holdingClampToggle = false;
 
     private enum ControlReferenceMode {
         ROBOT,
@@ -41,6 +37,9 @@ public class BasicControlled extends Mode {
     }
 
     private ControlReferenceMode controlReferenceMode = ControlReferenceMode.FIELD;
+
+    private ElapsedTime timer;
+    private double lastTime = 0;
 
     @Override
     public void onInit() {
@@ -57,10 +56,9 @@ public class BasicControlled extends Mode {
 
         claw.openLeft();
         claw.openRight();
-    }
 
-    private ElapsedTime timer = new ElapsedTime();
-    private double lastTime = 0;
+        timer = new ElapsedTime();
+    }
 
     @Override
     public void tick(TelemetryPacket telemetryPacket) {
@@ -90,6 +88,9 @@ public class BasicControlled extends Mode {
         telemetry.addData("Frame time", dt);
 
         double power = gamepad.getAxis(Axis.RIGHT_TRIGGER) - gamepad.getAxis(Axis.LEFT_TRIGGER);
+        if (clamp) {
+            power = -1.0;
+        }
         arm.setPower(power);
 
         double angle = arm.getAngle();
@@ -121,11 +122,12 @@ public class BasicControlled extends Mode {
         }
 
         if (gamepad.getButton(Button.Y) && gamepad.getButton(Button.DPAD_UP)) {
-            clamp = !clamp;
-        }
-
-        if (clamp) {
-            arm.setPower(-1.0);
+            if (!holdingClampToggle) {
+                clamp = !clamp;
+                holdingClampToggle = true;
+            }
+        } else {
+            holdingClampToggle = false;
         }
 
         telemetry.addData("Claw Open", clawOpen);

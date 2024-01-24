@@ -4,14 +4,16 @@ import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 
+import org.firstinspires.ftc.teamcode.robot.HardwareID;
+
 @Config
 public class Wrist {
     public static final double WRIST_RANGE = Math.toRadians(355) * 0.9;
-    public static final double WRIST_MIN = Math.toRadians(-10);
+    public static final double WRIST_MIN = Math.toRadians(-15);
     private Servo wristServo;
 
     public Wrist(HardwareMap hardwareMap) {
-        wristServo = hardwareMap.get(Servo.class, "wrist");
+        wristServo = hardwareMap.get(Servo.class, HardwareID.WRIST);
     }
 
     public void setAngle(double angle) {
@@ -19,7 +21,7 @@ public class Wrist {
     }
 
     public double getAngle() {
-        return wristServo.getPosition() * WRIST_RANGE;
+        return wristServo.getPosition() * WRIST_RANGE + WRIST_MIN;
     }
 
     public double getAngleDegrees() {

@@ -20,14 +20,14 @@ public class PIDController {
     private double period;
 
     /**
-     * The base constructor for the PIDF controller
+     * The base constructor for the PID controller
      */
     public PIDController(double kp, double ki, double kd) {
         this(kp, ki, kd, 0, 0);
     }
 
     /**
-     * This is the full constructor for the PIDF controller. Our PIDF controller
+     * This is the full constructor for the PID controller. Our PID controller
      * includes a feed-forward value which is useful for fighting friction and gravity.
      * Our errorVal represents the return of e(t) and prevErrorVal is the previous error.
      *
@@ -111,7 +111,7 @@ public class PIDController {
     }
 
     /**
-     * @return the PIDF coefficients
+     * @return the PID coefficients
      */
     public double[] getCoefficients() {
         return new double[]{kP, kI, kD};
@@ -139,7 +139,7 @@ public class PIDController {
     }
 
     /**
-     * Calculates the next output of the PIDF controller.
+     * Calculates the next output of the PID controller.
      *
      * @return the next output using the current measured value via
      * {@link #calculate(double)}.
@@ -149,7 +149,7 @@ public class PIDController {
     }
 
     /**
-     * Calculates the next output of the PIDF controller.
+     * Calculates the next output of the PID controller.
      *
      * @param pv The given measured value.
      * @param sp The given setpoint.

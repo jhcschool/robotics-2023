@@ -13,14 +13,16 @@ import org.firstinspires.ftc.teamcode.robot.RobotConstraints;
 
 public class RedTrajectoryRepo implements TrajectoryRepo {
     private MecanumDrive drive;
+    private PlayStyle playStyle;
     private static final Pose2d START_POSE = new Pose2d(12, -72 + RobotConstraints.LENGTH_FROM_CENTER, Math.toRadians(90));
     private Pose2d floorPlacePose;
     private static final Pose2d CENTER_BACKDROP_POSE = new Pose2d(60 - RobotConstraints.OUTPUT_LENGTH_FROM_CENTER, -36, Math.toRadians(180));
     private Pose2d firstBackdropPose = CENTER_BACKDROP_POSE;
-    private static final Pose2d PIXEL_STACK_POSE = new Pose2d(-70 + RobotConstraints.CLAW_LENGTH_FROM_CENTER, -36, Math.toRadians(180));
+    private static final Pose2d PIXEL_STACK_POSE = new Pose2d(-72 + RobotConstraints.CLAW_LENGTH_FROM_CENTER, -36, Math.toRadians(180));
 
-    public RedTrajectoryRepo(MecanumDrive drive) {
+    public RedTrajectoryRepo(MecanumDrive drive, PlayStyle playStyle) {
         this.drive = drive;
+        this.playStyle = playStyle;
     }
 
     @Override
@@ -55,14 +57,14 @@ public class RedTrajectoryRepo implements TrajectoryRepo {
     public Action toFirstBackdrop(PropLocation propLocation) {
         switch (propLocation) {
             case LEFT: {
-                firstBackdropPose = new Pose2d(firstBackdropPose.position.x, -29, Math.toRadians(180));
+                firstBackdropPose = new Pose2d(firstBackdropPose.position.x, -28.5, Math.toRadians(180));
                 break;
             }
             case CENTER: {
                 break;
             }
             case RIGHT: {
-                firstBackdropPose = new Pose2d(firstBackdropPose.position.x, -43.5, Math.toRadians(180));
+                firstBackdropPose = new Pose2d(firstBackdropPose.position.x, -42.5, Math.toRadians(180));
                 break;
             }
         }
@@ -74,9 +76,7 @@ public class RedTrajectoryRepo implements TrajectoryRepo {
 
     @Override
     public Action toFirstPixelStack() {
-        return drive.actionBuilder(FieldInfo.getRealPose(firstBackdropPose))
-                .strafeToLinearHeading(FieldInfo.getRealVector(PIXEL_STACK_POSE.position), PIXEL_STACK_POSE.heading)
-                .build();
+        return toPixelStack(firstBackdropPose);
     }
 
     @Override
@@ -88,8 +88,19 @@ public class RedTrajectoryRepo implements TrajectoryRepo {
 
     @Override
     public Action toPixelStack() {
-        return drive.actionBuilder(FieldInfo.getRealPose(PIXEL_STACK_POSE))
-                .strafeToLinearHeading(FieldInfo.getRealVector(PIXEL_STACK_POSE.position), PIXEL_STACK_POSE.heading)
+        return toPixelStack(CENTER_BACKDROP_POSE);
+    }
+
+    private Action toPixelStack(Pose2d pose) {
+        if (playStyle == PlayStyle.AGGRESSIVE) {
+            return drive.actionBuilder(FieldInfo.getRealPose(pose))
+                    .strafeToLinearHeading(FieldInfo.getRealVector(PIXEL_STACK_POSE.position), PIXEL_STACK_POSE.heading)
+                    .build();
+        }
+
+        return drive.actionBuilder(FieldInfo.getRealPose(pose))
+                .splineToSplineHeading(FieldInfo.getRealPose(new Pose2d(-12, -60, Math.toRadians(180))), Math.toRadians(175))
+                .splineToSplineHeading(FieldInfo.getRealPose(PIXEL_STACK_POSE), Math.toRadians(120))
                 .build();
     }
 }
