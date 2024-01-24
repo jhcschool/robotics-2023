@@ -14,7 +14,11 @@ public class WristSystem {
         wristController = new WristController(wrist);
     }
 
-    public void update(double armAngleFromBase) {
-        wristController.update(armAngleFromBase);
+    public void standardUpdate(double armAngle) {
+        wristController.update(armAngle);
+    }
+
+    public void setAngle(double angle) {
+        wrist.setAngle(angle);
     }
 }

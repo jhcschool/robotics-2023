@@ -1,50 +1,60 @@
 package org.firstinspires.ftc.teamcode.arm;
 
-import androidx.annotation.Nullable;
-
 import com.acmerobotics.dashboard.config.Config;
 
-import org.firstinspires.ftc.teamcode.utils.PIDFController;
+import org.firstinspires.ftc.teamcode.utils.PIDController;
 
 @Config
 public class ArmController {
 
-    public static PIDFController.PIDCoefficients PID_COEFFICIENTS = new PIDFController.PIDCoefficients(0.62, 0.0, 1e6);
-    public static double K_STATIC = 0.0;
-    public static double GRAVITY_COEFFICIENT = 0.13;
+    public static double K_P = 0.62;
+    public static double K_I = 0.0;
+    public static double K_D = 0.0;
+    public static double K_COS = 0.13;
+    public static double MAX_POWER = 0.7;
+    public static double POWER_MULTIPLIER = 1.0;
 
-    private PIDFController pidfController;
+    public static double POSITION_TOLERANCE = Math.toRadians(5.0);
+    public static double VELOCITY_TOLERANCE = Math.toRadians(5.0);
+
+    private PIDController pidController;
 
     public ArmController() {
-        pidfController = new PIDFController(PID_COEFFICIENTS, 0, 0, K_STATIC, ArmController::feedforward);
+        pidController = new PIDController(K_P, K_I, K_D);
+        pidController.setTolerance(POSITION_TOLERANCE, VELOCITY_TOLERANCE);
     }
 
     public void setTargetAngle(double targetAngle) {
-        pidfController.targetPosition = targetAngle;
-    }
+        pidController.setSetPoint(targetAngle);
 
-    public void setTargetVelocity(double targetVelocity) {
-        pidfController.targetVelocity = targetVelocity;
-    }
-
-    public void setTargetAcceleration(double targetAcceleration) {
-        pidfController.targetAcceleration = targetAcceleration;
+        pidController.clearTotalError();
     }
 
     public double update(double currentAngle) {
         // For tuning with dashboard
-        pidfController.setPIDCoefficients(PID_COEFFICIENTS);
-        pidfController.setFeedforwardCoefficients(0, 0, K_STATIC);
+        pidController.setPID(K_P, K_I, K_D);
 
-        return pidfController.update(currentAngle);
+        double power = pidController.calculate(currentAngle) * POWER_MULTIPLIER + feedforward(currentAngle);
+        return Math.max(-MAX_POWER, Math.min(MAX_POWER, power));
     }
 
     public double getTargetAngle() {
-        return pidfController.targetPosition;
+        return pidController.getSetPoint();
     }
 
+    public boolean atTarget() {
+        return pidController.atSetPoint();
+    }
 
-    private static double feedforward(double angle, @Nullable Double velocity) {
-        return GRAVITY_COEFFICIENT * Math.cos(angle);
+    public void setPositionTolerance(double positionTolerance) {
+        pidController.setTolerance(positionTolerance, pidController.getTolerance()[1]);
+    }
+
+    public void setVelocityTolerance(double velocityTolerance) {
+        pidController.setTolerance(pidController.getTolerance()[0], velocityTolerance);
+    }
+
+    private static double feedforward(double angle) {
+        return K_COS * Math.cos(angle);
     }
 }

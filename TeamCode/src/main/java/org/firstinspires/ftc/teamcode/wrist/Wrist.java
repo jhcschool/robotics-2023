@@ -7,15 +7,15 @@ import com.qualcomm.robotcore.hardware.Servo;
 @Config
 public class Wrist {
     public static final double WRIST_RANGE = Math.toRadians(355) * 0.9;
+    public static final double WRIST_MIN = Math.toRadians(-10);
     private Servo wristServo;
 
     public Wrist(HardwareMap hardwareMap) {
         wristServo = hardwareMap.get(Servo.class, "wrist");
-        wristServo.setPosition(0.0);
     }
 
     public void setAngle(double angle) {
-        wristServo.setPosition(angle / WRIST_RANGE);
+        wristServo.setPosition((angle - WRIST_MIN) / WRIST_RANGE);
     }
 
     public double getAngle() {

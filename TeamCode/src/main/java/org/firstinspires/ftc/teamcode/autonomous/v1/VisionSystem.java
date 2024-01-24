@@ -96,7 +96,7 @@ public class VisionSystem {
 //
 //        return maxPropLocation;
 
-        return PropLocation.LEFT;
+        return PropLocation.RIGHT;
     }
 
 }

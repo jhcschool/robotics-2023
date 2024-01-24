@@ -14,12 +14,8 @@ import org.firstinspires.ftc.teamcode.wrist.WristController;
 
 @Config
 public class ArmSystem {
-    public static double RAISED_ANGLE = Math.toRadians(130);
-    private static final double BASE_ANGLE = -WristController.ARM_ANGLE_BASE_TO_LEVEL;
-    public static double ERROR_THRESHOLD = Math.toRadians(10);
-    public static double OSCILLATION_TIME = 0.2;
-    public static double POWER_MULTIPLIER = 0.7;
-    public static double MAX_POWER = 0.7;
+    public static double RAISED_ANGLE = Math.toRadians(150);
+    public static double OSCILLATION_TIME = 0.3;
 
     private Arm arm;
 
@@ -43,14 +39,11 @@ public class ArmSystem {
                 return false;
             }
 
-            if (Math.abs(armController.getTargetAngle() - arm.getAngle()) < ERROR_THRESHOLD) {
+            if (armController.atTarget()) {
                 timeSinceHit = new ElapsedTime();
             }
 
-            double power = armController.update(arm.getAngle()) * POWER_MULTIPLIER;
-            power = Math.min(Math.abs(power), MAX_POWER) * Math.signum(power);
-
-            arm.setPower(power);
+            arm.setPower(armController.update(arm.getAngle()));
             return true;
         }
     }
@@ -60,7 +53,11 @@ public class ArmSystem {
     }
 
     public Action lowerArm() {
-        return new ArmAction(BASE_ANGLE);
+        return new ArmAction(Arm.BASE_ANGLE);
+    }
+
+    public Action setAngle(double angle) {
+        return new ArmAction(angle);
     }
 
     public double getAngle() {

@@ -2,16 +2,12 @@ package org.firstinspires.ftc.teamcode.tests.controlled;
 
 import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-import com.qualcomm.robotcore.hardware.AnalogInput;
-import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.teamcode.base.Mode;
 import org.firstinspires.ftc.teamcode.input.Button;
 import org.firstinspires.ftc.teamcode.input.ButtonAction;
 import org.firstinspires.ftc.teamcode.input.GrizzlyGamepad;
-import org.firstinspires.ftc.teamcode.robot.HardwareID;
-import org.firstinspires.ftc.teamcode.robot.Potentiometer;
 
 @TeleOp(name = "Servo Test", group = "Controlled Tests")
 public class ServoTestMode extends Mode {

@@ -41,7 +41,7 @@ public class RedTrajectoryRepo implements TrajectoryRepo {
                 break;
             }
             case RIGHT: {
-                floorPlacePose = new Pose2d(23.25 + RobotConstraints.RIGHT_CLAW_WIDTH_FROM_CENTER, -24.75 + RobotConstraints.LEFT_CLAW_WIDTH_FROM_CENTER, Math.toRadians(180));
+                floorPlacePose = new Pose2d(23.25 + RobotConstraints.CLAW_LENGTH_FROM_CENTER, -24.75 + RobotConstraints.LEFT_CLAW_WIDTH_FROM_CENTER, Math.toRadians(180));
                 break;
             }
         }
@@ -55,14 +55,14 @@ public class RedTrajectoryRepo implements TrajectoryRepo {
     public Action toFirstBackdrop(PropLocation propLocation) {
         switch (propLocation) {
             case LEFT: {
-                firstBackdropPose = new Pose2d(firstBackdropPose.position.x, -29.5 + RobotConstraints.RIGHT_CLAW_WIDTH_FROM_CENTER, Math.toRadians(180));
+                firstBackdropPose = new Pose2d(firstBackdropPose.position.x, -29, Math.toRadians(180));
                 break;
             }
             case CENTER: {
                 break;
             }
             case RIGHT: {
-                firstBackdropPose = new Pose2d(firstBackdropPose.position.x, -42.5 + RobotConstraints.RIGHT_CLAW_WIDTH_FROM_CENTER, Math.toRadians(180));
+                firstBackdropPose = new Pose2d(firstBackdropPose.position.x, -43.5, Math.toRadians(180));
                 break;
             }
         }

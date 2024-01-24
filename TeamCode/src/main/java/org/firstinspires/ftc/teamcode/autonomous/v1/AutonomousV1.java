@@ -5,7 +5,6 @@ import com.acmerobotics.roadrunner.Action;
 import com.acmerobotics.roadrunner.ParallelAction;
 import com.acmerobotics.roadrunner.Pose2d;
 import com.acmerobotics.roadrunner.SequentialAction;
-import com.qualcomm.hardware.lynx.LynxModule;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
@@ -13,11 +12,8 @@ import org.firstinspires.ftc.teamcode.actions.DelayedAction;
 import org.firstinspires.ftc.teamcode.base.Mode;
 import org.firstinspires.ftc.teamcode.drive.MecanumDrive;
 import org.firstinspires.ftc.teamcode.game.AllianceColor;
-import org.firstinspires.ftc.teamcode.game.PropLocation;
 import org.firstinspires.ftc.teamcode.input.Button;
 import org.firstinspires.ftc.teamcode.input.GrizzlyGamepad;
-import org.firstinspires.ftc.teamcode.vision.TeamPropProcessor;
-import org.firstinspires.ftc.vision.VisionPortal;
 
 @Autonomous(name = "Autonomous V1", group = "Autonomous")
 public class AutonomousV1 extends Mode {
@@ -112,8 +108,8 @@ public class AutonomousV1 extends Mode {
 
         Action toFirstBackdrop = new SequentialAction(
                 new ParallelAction(
-                        trajectoryRepo.toFirstBackdrop(visionSystem.getPropLocation()),
-                        new DelayedAction(0.3, armSystem.raiseArm())
+                        new DelayedAction(0.3, trajectoryRepo.toFirstBackdrop(visionSystem.getPropLocation())),
+                        armSystem.raiseArm()
                 ),
                 clawSystem.openRight());
 
@@ -135,7 +131,7 @@ public class AutonomousV1 extends Mode {
         action.run(packet);
 
         double angle = armSystem.getAngle();
-        wristSystem.update(angle);
+        wristSystem.standardUpdate(angle);
 
         telemetry.addData("Pose", drive.pose);
         telemetry.addData("Prop Location", visionSystem.getPropLocation());
