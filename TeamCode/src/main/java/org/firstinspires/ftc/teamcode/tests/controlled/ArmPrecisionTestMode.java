@@ -15,14 +15,20 @@ import org.firstinspires.ftc.teamcode.base.Mode;
 import org.firstinspires.ftc.teamcode.input.Button;
 import org.firstinspires.ftc.teamcode.input.ButtonAction;
 import org.firstinspires.ftc.teamcode.input.GrizzlyGamepad;
+import org.firstinspires.ftc.teamcode.wrist.Wrist;
+import org.firstinspires.ftc.teamcode.wrist.WristController;
 
-@TeleOp(name = "Arm PID Test", group = "Controlled Tests")
-public class ArmPIDTestMode extends Mode {
+@TeleOp(name = "Arm Precision Test", group = "Controlled Tests")
+public class ArmPrecisionTestMode extends Mode {
+    private static final double FLIPPED_ANGLE = Math.toRadians(150);
+
     private Arm arm;
     private ArmController armController;
-    private double targetAngle = 20.0;
+    private double baseOffset = 5;
     private GrizzlyGamepad gamepad;
-    private MultipleTelemetry telemetry;
+    private boolean flipped = false;
+    private Wrist wrist;
+    private WristController wristController;
 
     @Override
     public void onInit() {
@@ -31,42 +37,42 @@ public class ArmPIDTestMode extends Mode {
         arm = new Arm(hardwareMap);
         armController = new ArmController();
 
-        armController.setTargetAngle(Math.toRadians(targetAngle));
+        armController.setTargetAngle(Math.toRadians(baseOffset) + Arm.BASE_ANGLE);
 
         gamepad = new GrizzlyGamepad(gamepad1);
 
-        telemetry = new MultipleTelemetry(super.telemetry, FtcDashboard.getInstance().getTelemetry());
+        wrist = new Wrist(hardwareMap);
+        wristController = new WristController(wrist);
     }
-
-    ElapsedTime time = new ElapsedTime();
 
     @Override
     public void tick(TelemetryPacket packet) {
         super.tick(packet);
-
-        double deltaTime = time.seconds();
-        time.reset();
 
         gamepad.update();
 
         double power = armController.update(arm.getAngle());
         arm.setPower(power);
 
+        wristController.update(arm.getAngle(), Math.toRadians(baseOffset));
+
         if (gamepad.getButtonAction(Button.A) == ButtonAction.PRESS) {
-            armController.setTargetAngle(Math.toRadians(targetAngle));
+            flipped = !flipped;
+            armController.setTargetAngle(flipped ? FLIPPED_ANGLE : Math.toRadians(baseOffset) + Arm.BASE_ANGLE);
         }
 
-        if (gamepad.getButton(Button.DPAD_UP)) {
-            targetAngle += 30.0 * deltaTime;
+        if (gamepad.getButtonAction(Button.DPAD_UP) == ButtonAction.PRESS) {
+            baseOffset += 1.0;
         }
 
-        if (gamepad.getButton(Button.DPAD_DOWN)) {
-            targetAngle -= 30.0 * deltaTime;
+        if (gamepad.getButtonAction(Button.DPAD_DOWN) == ButtonAction.PRESS) {
+            baseOffset -= 1.0;
         }
 
-        telemetry.addData("Target Angle", targetAngle);
+        telemetry.addData("Offset", baseOffset);
         telemetry.addData("Arm Power", power);
         telemetry.addData("Arm Degrees", arm.getAngleDegrees());
         telemetry.addData("Arm Target Degrees", Math.toDegrees(armController.getTargetAngle()));
+        telemetry.addData("Wrist Degrees", wrist.getAngleDegrees());
     }
 }

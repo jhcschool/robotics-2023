@@ -22,9 +22,7 @@ public class Arm {
 
         armEncoder = new RawEncoder(armMotor);
 
-        // reset the encoder
-        armMotor.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
-        armMotor.setMode(DcMotorEx.RunMode.RUN_WITHOUT_ENCODER);
+        resetEncoder();
     }
 
     public void setPower(double power) {
@@ -45,5 +43,10 @@ public class Arm {
 
     public double getVelocity() {
         return (armEncoder.getPositionAndVelocity().velocity / TICKS_PER_REV) * 2 * Math.PI;
+    }
+
+    public void resetEncoder() {
+        armMotor.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
+        armMotor.setMode(DcMotorEx.RunMode.RUN_WITHOUT_ENCODER);
     }
 }

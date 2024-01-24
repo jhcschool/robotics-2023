@@ -68,6 +68,7 @@ public class AutonomousV1 extends Mode {
 
         drive.updatePoseEstimate();
         visionSystem.update();
+        armSystem.beforeStart();
     }
 
     public void initForAlliance() {
@@ -83,6 +84,7 @@ public class AutonomousV1 extends Mode {
         drive.pose = trajectoryRepo.getStartPose();
 
         visionSystem.initForAlliance(hardwareMap, allianceColor);
+        armSystem.onInit();
     }
 
     @Override
@@ -131,7 +133,7 @@ public class AutonomousV1 extends Mode {
         action.run(packet);
 
         double angle = armSystem.getAngle();
-        wristSystem.standardUpdate(angle);
+        wristSystem.update(angle);
 
         telemetry.addData("Pose", drive.pose);
         telemetry.addData("Prop Location", visionSystem.getPropLocation());

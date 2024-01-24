@@ -15,12 +15,21 @@ import org.firstinspires.ftc.teamcode.wrist.WristController;
 @Config
 public class ArmSystem {
     public static double RAISED_ANGLE = Math.toRadians(150);
-    public static double OSCILLATION_TIME = 0.3;
+    public static double OSCILLATION_TIME = 0.2;
 
     private Arm arm;
 
     public ArmSystem(HardwareMap hardwareMap) {
         arm = new Arm(hardwareMap);
+    }
+
+    public void beforeStart() {
+        arm.setPower(-0.1); // Make sure it is down before start
+    }
+
+    public void onInit() {
+        arm.setPower(0.0);
+        arm.resetEncoder();
     }
 
     private class ArmAction implements Action {
