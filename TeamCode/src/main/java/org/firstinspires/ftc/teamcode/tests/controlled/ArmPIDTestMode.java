@@ -15,6 +15,8 @@ import org.firstinspires.ftc.teamcode.base.Mode;
 import org.firstinspires.ftc.teamcode.input.Button;
 import org.firstinspires.ftc.teamcode.input.ButtonAction;
 import org.firstinspires.ftc.teamcode.input.GrizzlyGamepad;
+import org.firstinspires.ftc.teamcode.wrist.Wrist;
+import org.firstinspires.ftc.teamcode.wrist.WristController;
 
 @TeleOp(name = "Arm PID Test", group = "Controlled Tests")
 public class ArmPIDTestMode extends Mode {
@@ -23,6 +25,8 @@ public class ArmPIDTestMode extends Mode {
     private double targetAngle = 20.0;
     private GrizzlyGamepad gamepad;
     private MultipleTelemetry telemetry;
+    private Wrist wrist;
+    private WristController wristController;
 
     @Override
     public void onInit() {
@@ -36,13 +40,18 @@ public class ArmPIDTestMode extends Mode {
         gamepad = new GrizzlyGamepad(gamepad1);
 
         telemetry = new MultipleTelemetry(super.telemetry, FtcDashboard.getInstance().getTelemetry());
+
+        wrist = new Wrist(hardwareMap);
+        wristController = new WristController(wrist);
     }
 
-    ElapsedTime time = new ElapsedTime();
+    private ElapsedTime time = new ElapsedTime();
 
     @Override
     public void tick(TelemetryPacket packet) {
         super.tick(packet);
+
+        telemetry.update();
 
         double deltaTime = time.seconds();
         time.reset();
@@ -51,6 +60,8 @@ public class ArmPIDTestMode extends Mode {
 
         double power = armController.update(arm.getAngle());
         arm.setPower(power);
+
+        wristController.update(arm.getAngle());
 
         if (gamepad.getButtonAction(Button.A) == ButtonAction.PRESS) {
             armController.setTargetAngle(Math.toRadians(targetAngle));
@@ -68,5 +79,6 @@ public class ArmPIDTestMode extends Mode {
         telemetry.addData("Arm Power", power);
         telemetry.addData("Arm Degrees", arm.getAngleDegrees());
         telemetry.addData("Arm Target Degrees", Math.toDegrees(armController.getTargetAngle()));
+
     }
 }

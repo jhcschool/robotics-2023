@@ -14,7 +14,7 @@ import org.firstinspires.ftc.teamcode.wrist.WristController;
 
 @Config
 public class ArmSystem {
-    public static double RAISED_ANGLE = Math.toRadians(150);
+    public static double RAISED_ANGLE = Math.toRadians(145);
     public static double OSCILLATION_TIME = 0.2;
 
     private Arm arm;
@@ -35,10 +35,12 @@ public class ArmSystem {
     private class ArmAction implements Action {
         private ArmController armController;
         private ElapsedTime timeSinceHit = null;
+        private double targetAngle = 0;
 
         public ArmAction(double targetAngle) {
             armController = new ArmController();
             armController.setTargetAngle(targetAngle);
+            this.targetAngle = targetAngle;
         }
 
         @Override
@@ -49,7 +51,13 @@ public class ArmSystem {
             }
 
             if (armController.atTarget()) {
-                timeSinceHit = new ElapsedTime();
+                if (targetAngle == Arm.BASE_ANGLE) {
+                    arm.setPower(-0.2);
+                }
+
+                if (timeSinceHit == null) {
+                    timeSinceHit = new ElapsedTime();
+                }
             }
 
             arm.setPower(armController.update(arm.getAngle()));

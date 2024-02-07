@@ -10,7 +10,7 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 import org.firstinspires.ftc.teamcode.claw.Claw;
 
 public class ClawSystem {
-    private static final double TIME_TO_MOVE = 0.2;
+    private static final double TIME_TO_MOVE = 0.4;
 
     private Claw claw;
 

@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.autonomous.v1;
+package org.firstinspires.ftc.teamcode.autonomous.far;
 
 import com.acmerobotics.roadrunner.Action;
 import com.acmerobotics.roadrunner.Pose2d;
@@ -11,12 +11,9 @@ public interface TrajectoryRepo {
 
     Action toFloorPlace(PropLocation propLocation);
 
-    Action toFirstBackdrop(PropLocation propLocation);
+    Action toWaitPosition();
 
-    Action toFirstPixelStack();
+    Action toBackdrop(PropLocation propLocation);
 
-    Action toCycleBackdrop();
-
-    Action toPixelStack();
-
+    Action toPark();
 }

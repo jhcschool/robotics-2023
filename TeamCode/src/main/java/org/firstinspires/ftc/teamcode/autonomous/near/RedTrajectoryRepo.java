@@ -1,10 +1,8 @@
-package org.firstinspires.ftc.teamcode.autonomous.v1;
+package org.firstinspires.ftc.teamcode.autonomous.near;
 
 import com.acmerobotics.roadrunner.Action;
 import com.acmerobotics.roadrunner.Pose2d;
-import com.acmerobotics.roadrunner.TrajectoryActionBuilder;
 import com.acmerobotics.roadrunner.Vector2d;
-import com.qualcomm.robotcore.robot.Robot;
 
 import org.firstinspires.ftc.teamcode.drive.MecanumDrive;
 import org.firstinspires.ftc.teamcode.game.FieldInfo;
@@ -19,6 +17,8 @@ public class RedTrajectoryRepo implements TrajectoryRepo {
     private static final Pose2d CENTER_BACKDROP_POSE = new Pose2d(60 - RobotConstraints.OUTPUT_LENGTH_FROM_CENTER, -36, Math.toRadians(180));
     private Pose2d firstBackdropPose = CENTER_BACKDROP_POSE;
     private static final Pose2d PIXEL_STACK_POSE = new Pose2d(-72 + RobotConstraints.CLAW_LENGTH_FROM_CENTER, -36, Math.toRadians(180));
+    private static final Pose2d CENTER_PARK_POSE = new Pose2d(60, -12, Math.toRadians(180));
+    private static final Pose2d INNER_PARK_POSE = new Pose2d(60, -60, Math.toRadians(180));
 
     public RedTrajectoryRepo(MecanumDrive drive, PlayStyle playStyle) {
         this.drive = drive;
@@ -89,6 +89,41 @@ public class RedTrajectoryRepo implements TrajectoryRepo {
     @Override
     public Action toPixelStack() {
         return toPixelStack(CENTER_BACKDROP_POSE);
+    }
+
+    @Override
+    public Action toPark(ParkingLocation parkingLocation) {
+        return toPark(PropLocation.CENTER, parkingLocation);
+    }
+
+    @Override
+    public Action toPark(PropLocation propLocation, ParkingLocation parkingLocation) {
+        Pose2d pose;
+        switch (propLocation) {
+            case LEFT:
+            case RIGHT:
+                pose = firstBackdropPose;
+                break;
+            case CENTER:
+            default:
+                pose = CENTER_BACKDROP_POSE;
+                break;
+        }
+
+        switch (parkingLocation) {
+            case CENTER:
+                return drive.actionBuilder(FieldInfo.getRealPose(pose))
+                        .strafeToLinearHeading(FieldInfo.getRealVector(new Vector2d(36, -12)), Math.toRadians(180))
+                        .strafeToLinearHeading(FieldInfo.getRealVector(CENTER_PARK_POSE.position), CENTER_PARK_POSE.heading)
+                        .build();
+            case INNER:
+                return drive.actionBuilder(FieldInfo.getRealPose(pose))
+                        .strafeToLinearHeading(FieldInfo.getRealVector(new Vector2d(36, -60)), Math.toRadians(180))
+                        .strafeToLinearHeading(FieldInfo.getRealVector(INNER_PARK_POSE.position), INNER_PARK_POSE.heading)
+                        .build();
+        }
+
+        return null;
     }
 
     private Action toPixelStack(Pose2d pose) {

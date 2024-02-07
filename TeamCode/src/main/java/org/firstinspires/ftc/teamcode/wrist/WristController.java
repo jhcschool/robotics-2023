@@ -9,13 +9,13 @@ public class WristController {
     // For lower arm angles, the wrist should be at 0 degrees.
 
     private static double BACKDROP_ANGLE = Math.toRadians(360 - 60);
-    private static double ARM_THRESHOLD = Math.toRadians(110);
-    private static double IMPACT_TIME_THRESHOLD = 0.1;
-    private static double IMPACT_ANGLE_THRESHOLD = Math.toRadians(5);
+    private static double ARM_THRESHOLD = Math.toRadians(95);
+    private static double IMPACT_TIME_THRESHOLD = 0.2;
+    private static double IMPACT_ANGLE_THRESHOLD = Math.toRadians(9);
 
     private Wrist wrist;
-    private double lastArmAngle = 0.0;
-    private ElapsedTime timeSinceCrossProtectionThreshold = null;
+    private double lastArmAngle = Arm.BASE_ANGLE;
+    private ElapsedTime timeSinceCrossProtectionThreshold = new ElapsedTime();
 
     public WristController(Wrist wrist) {
         this.wrist = wrist;
@@ -25,18 +25,20 @@ public class WristController {
         double wristProtectionThreshold = IMPACT_ANGLE_THRESHOLD + armOffset + Arm.BASE_ANGLE;
         if (lastArmAngle > wristProtectionThreshold && armAngle < wristProtectionThreshold) {
             timeSinceCrossProtectionThreshold = new ElapsedTime();
+        } else if (lastArmAngle < wristProtectionThreshold && armAngle > wristProtectionThreshold) {
+            timeSinceCrossProtectionThreshold = null;
         }
 
-        if (timeSinceCrossProtectionThreshold != null && timeSinceCrossProtectionThreshold.seconds() < IMPACT_TIME_THRESHOLD) {
-            wrist.setAngle(Math.toRadians(5));
+        lastArmAngle = armAngle;
+
+        if (timeSinceCrossProtectionThreshold != null && timeSinceCrossProtectionThreshold.seconds() > IMPACT_TIME_THRESHOLD) {
+            wrist.setAngle(0.0 - armOffset);
             return;
-        } else {
-            timeSinceCrossProtectionThreshold = null;
         }
 
 
         if (armAngle < (ARM_THRESHOLD)) {
-            wrist.setAngle(0.0 - armOffset);
+            wrist.setAngle(Math.toRadians(35));
         } else {
             wrist.setAngle(BACKDROP_ANGLE - (armAngle - Arm.BASE_ANGLE));
         }

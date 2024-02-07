@@ -12,6 +12,10 @@ public class DelayedAction implements Action {
         this.action = action;
     }
 
+    public DelayedAction(double delay) {
+        this.delay = delay;
+    }
+
     private double delay;
     private Action action;
     private ElapsedTime elapsedTime;
@@ -24,7 +28,11 @@ public class DelayedAction implements Action {
         }
 
         if (elapsedTime.seconds() > delay) {
-            return action.run(telemetryPacket);
+            if (action != null) {
+                return action.run(telemetryPacket);
+            }
+
+            return false;
         }
 
         return true;

@@ -7,7 +7,7 @@ public class RobotConstraints {
     public static final double WIDTH_FROM_CENTER = WIDTH / 2;
 
     public static final double CLAW_LENGTH_FROM_CENTER = 14;
-    public static final double OUTPUT_LENGTH_FROM_CENTER = 17;
+    public static final double OUTPUT_LENGTH_FROM_CENTER = 16.5;
     public static final double LEFT_CLAW_WIDTH_FROM_CENTER = 1.5;
     public static final double RIGHT_CLAW_WIDTH_FROM_CENTER = 1.5;
 }

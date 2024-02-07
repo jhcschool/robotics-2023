@@ -13,7 +13,7 @@ import org.firstinspires.ftc.teamcode.wrist.WristController;
 
 @Config
 public class WristSystem {
-    private static final double FOLD_ANGLE = 210;
+    private static final double FOLD_ANGLE = Math.toRadians(180);
     private static final double TIME_TO_FOLD = 0.3;
 
     private Wrist wrist;

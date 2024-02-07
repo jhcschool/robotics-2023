@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.controlled.basic;
 
+import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.acmerobotics.roadrunner.Pose2d;
 import com.acmerobotics.roadrunner.PoseVelocity2d;
@@ -18,9 +19,12 @@ import org.firstinspires.ftc.teamcode.input.GrizzlyGamepad;
 import org.firstinspires.ftc.teamcode.wrist.Wrist;
 import org.firstinspires.ftc.teamcode.wrist.WristController;
 
+@Config
 @TeleOp(name = "Basic Controlled", group = "Controlled")
 public class BasicControlled extends Mode {
-
+    public static double K_COS = 0.10;
+    public static double DEADZONE = 0;
+    public static double ANGLE_WEIGHTING = 0.6;
     private boolean clawOpen = true;
     private GrizzlyGamepad gamepad;
     private MecanumDrive drive;
@@ -36,7 +40,7 @@ public class BasicControlled extends Mode {
         FIELD
     }
 
-    private ControlReferenceMode controlReferenceMode = ControlReferenceMode.FIELD;
+    private ControlReferenceMode controlReferenceMode = ControlReferenceMode.ROBOT;
 
     private ElapsedTime timer;
     private double lastTime = 0;
@@ -58,6 +62,8 @@ public class BasicControlled extends Mode {
         claw.openRight();
 
         timer = new ElapsedTime();
+
+        setGamepadLed();
     }
 
     @Override
@@ -87,13 +93,23 @@ public class BasicControlled extends Mode {
 
         telemetry.addData("Frame time", dt);
 
+        double angle = arm.getAngle();
+
         double power = gamepad.getAxis(Axis.RIGHT_TRIGGER) - gamepad.getAxis(Axis.LEFT_TRIGGER);
         if (clamp) {
             power = -1.0;
+        } else {
+            if (Math.abs(angle - Math.toRadians(90)) < Math.toRadians(DEADZONE)) {
+                power = 0.0;
+            }
+
+            power -= power * ANGLE_WEIGHTING * Math.abs(Math.sin(angle));
+            power += Math.cos(angle) * K_COS;
+
+            power = Math.max(-1, Math.min(1, power));
         }
         arm.setPower(power);
 
-        double angle = arm.getAngle();
 
         telemetry.addData("Arm Power", power);
         telemetry.addData("Arm Angle", Math.toDegrees(angle));
@@ -119,6 +135,7 @@ public class BasicControlled extends Mode {
             }
 
             controlReferenceMode = ControlReferenceMode.values()[newValue];
+            setGamepadLed();
         }
 
         if (gamepad.getButton(Button.Y) && gamepad.getButton(Button.DPAD_UP)) {
@@ -134,5 +151,13 @@ public class BasicControlled extends Mode {
         telemetry.addData("Wrist Angle", wrist.getAngleDegrees());
 
         telemetry.addData("Control Reference Mode", controlReferenceMode);
+    }
+
+    private void setGamepadLed() {
+        if (controlReferenceMode == ControlReferenceMode.ROBOT) {
+            gamepad.setLed(255, 0, 0);
+        } else {
+            gamepad.setLed(0, 0, 255);
+        }
     }
 }

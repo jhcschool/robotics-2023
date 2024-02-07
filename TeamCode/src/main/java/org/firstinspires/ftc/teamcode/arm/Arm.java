@@ -4,6 +4,7 @@ import com.acmerobotics.roadrunner.ftc.Encoder;
 import com.acmerobotics.roadrunner.ftc.RawEncoder;
 import com.qualcomm.robotcore.hardware.AnalogInput;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
 import org.firstinspires.ftc.teamcode.robot.HardwareID;
@@ -11,7 +12,7 @@ import org.firstinspires.ftc.teamcode.wrist.WristController;
 
 public class Arm {
     private static final double TICKS_PER_REV = 8192;
-    public static double BASE_ANGLE = Math.toRadians(-29.2);
+    public static double BASE_ANGLE = Math.toRadians(-26.2);
 
     private DcMotorEx armMotor;
     private Encoder armEncoder;
@@ -19,6 +20,7 @@ public class Arm {
     public Arm(HardwareMap hardwareMap) {
         armMotor = hardwareMap.get(DcMotorEx.class, HardwareID.ARM_MOTOR);
         armMotor.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
+        armMotor.setDirection(DcMotorSimple.Direction.REVERSE);
 
         armEncoder = new RawEncoder(armMotor);
 

@@ -1,5 +1,6 @@
-package org.firstinspires.ftc.teamcode.autonomous.v1;
+package org.firstinspires.ftc.teamcode.autonomous.far;
 
+import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.acmerobotics.roadrunner.Action;
 import com.acmerobotics.roadrunner.ParallelAction;
@@ -19,8 +20,9 @@ import org.firstinspires.ftc.teamcode.game.AllianceColor;
 import org.firstinspires.ftc.teamcode.input.Button;
 import org.firstinspires.ftc.teamcode.input.GrizzlyGamepad;
 
-@Autonomous(name = "Autonomous V1", group = "Autonomous")
-public class AutonomousV1 extends Mode {
+@Config
+@Autonomous(name = "Near Autonomous", group = "Autonomous")
+public class NearAutonomous extends Mode {
 
     private AllianceColor allianceColor = AllianceColor.RED;
     private boolean confirmedAlliance = false;
@@ -33,7 +35,6 @@ public class AutonomousV1 extends Mode {
     private WristSystem wristSystem;
     private ClawSystem clawSystem;
     private Action action;
-    private PlayStyle playStyle = PlayStyle.AGGRESSIVE;
 
     @Override
     public void onInit() {
@@ -61,7 +62,7 @@ public class AutonomousV1 extends Mode {
     public void beforeStartLoop() {
         super.beforeStartLoop();
 
-        if (!action.run(new TelemetryPacket())) {
+        if (action != null && !action.run(new TelemetryPacket())) {
             action = null;
         }
 
@@ -73,14 +74,6 @@ public class AutonomousV1 extends Mode {
                 allianceColor = AllianceColor.RED;
             } else if (gamepad.getButton(Button.B)) {
                 allianceColor = AllianceColor.BLUE;
-            }
-
-            telemetry.addData("Play Style", playStyle.toString());
-            telemetry.addLine("Press DPad Up for aggressive play style, DPad Down for conservative play style");
-            if (gamepad.getButton(Button.DPAD_UP)) {
-                playStyle = PlayStyle.AGGRESSIVE;
-            } else if (gamepad.getButton(Button.DPAD_DOWN)) {
-                playStyle = PlayStyle.CONSERVATIVE;
             }
 
             if (gamepad.getButton(Button.X)) {
@@ -100,10 +93,10 @@ public class AutonomousV1 extends Mode {
     public void initForAlliance() {
         switch (allianceColor) {
             case RED:
-                trajectoryRepo = new RedTrajectoryRepo(drive, playStyle);
+                trajectoryRepo = new RedTrajectoryRepo(drive);
                 break;
             case BLUE:
-                trajectoryRepo = new BlueTrajectoryRepo(drive, playStyle);
+                trajectoryRepo = new BlueTrajectoryRepo(drive);
                 break;
         }
 
@@ -136,7 +129,7 @@ public class AutonomousV1 extends Mode {
 
         Action toFirstBackdrop = new SequentialAction(
                 new ParallelAction(
-                        new DelayedAction(0.3, trajectoryRepo.toFirstBackdrop(visionSystem.getPropLocation())),
+                        new DelayedAction(0.3, trajectoryRepo.toBackdrop(visionSystem.getPropLocation())),
                         armSystem.raiseArm()
                 ),
                 clawSystem.openRight());
@@ -144,7 +137,8 @@ public class AutonomousV1 extends Mode {
         action = new SequentialAction(
                 clawClose,
                 toFloorPlace,
-                toFirstBackdrop
+                toFirstBackdrop,
+                armSystem.lowerArm()
         );
     }
 
