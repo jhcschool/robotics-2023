@@ -9,7 +9,7 @@ import org.firstinspires.ftc.teamcode.robot.HardwareID;
 @Config
 public class Wrist {
     public static final double WRIST_RANGE = Math.toRadians(355) * 0.98;
-    public static final double WRIST_MIN = Math.toRadians(-14);
+    public static final double WRIST_MIN = Math.toRadians(-12.5);
     private Servo wristServo;
 
     public Wrist(HardwareMap hardwareMap) {

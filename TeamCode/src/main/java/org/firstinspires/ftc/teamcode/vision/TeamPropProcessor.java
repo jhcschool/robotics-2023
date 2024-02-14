@@ -17,16 +17,16 @@ public class TeamPropProcessor implements VisionProcessor {
 
     // with 640 by 480, tlLeft for the left third should be (0, 0), brLeft should be (213, 480), tlCenter should be (213, 0), brCenter should be (426, 480), tlRight should be (426, 0), brRight should be (640, 480). of course, these should be tuned for the actual prop and camera position.
 
-    private Point tlLeft = new Point(0, 0);
-    private Point brLeft = new Point(213, 480);
+    private final Point tlLeft;
+    private final Point brLeft;
     private int leftPixelCount = 0;
 
-    private Point tlCenter = new Point(213, 0);
-    private Point brCenter = new Point(426, 480);
+    private final Point tlCenter;
+    private final Point brCenter;
     private int centerPixelCount = 0;
 
-    private Point tlRight = new Point(426, 0);
-    private Point brRight = new Point(640, 480);
+    private final Point tlRight;
+    private final Point brRight;
     private int rightPixelCount = 0;
 
     // Threshold for red should be around (0, 100, 100) to (10, 255, 255) and (160, 100, 100) to (179, 255, 255)
@@ -203,11 +203,11 @@ public class TeamPropProcessor implements VisionProcessor {
     }
 
     public static class Builder {
-        private Point tlLeft = new Point(0, 0);
-        private Point brLeft = new Point(213, 480);
-        private Point tlCenter = new Point(213, 0);
+        private Point tlLeft = new Point(0, 300);
+        private Point brLeft = new Point(150, 480);
+        private Point tlCenter = new Point(213, 300);
         private Point brCenter = new Point(426, 480);
-        private Point tlRight = new Point(426, 0);
+        private Point tlRight = new Point(520, 300);
         private Point brRight = new Point(640, 480);
         private Scalar lowerThreshold = new Scalar(0, 100, 100);
         private Scalar upperThreshold = new Scalar(10, 255, 255);

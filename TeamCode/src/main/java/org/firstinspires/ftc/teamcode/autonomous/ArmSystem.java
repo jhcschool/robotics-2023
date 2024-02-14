@@ -14,7 +14,7 @@ import org.firstinspires.ftc.teamcode.wrist.WristController;
 
 @Config
 public class ArmSystem {
-    public static double RAISED_ANGLE = Math.toRadians(145);
+    public static double RAISED_ANGLE = Math.toRadians(155);
     public static double OSCILLATION_TIME = 0.2;
 
     private Arm arm;
@@ -33,8 +33,10 @@ public class ArmSystem {
     }
 
     private class ArmAction implements Action {
+        private static final double TIMEOUT = 4.0;
         private ArmController armController;
         private ElapsedTime timeSinceHit = null;
+        private ElapsedTime timeSinceStart = null;
         private double targetAngle = 0;
 
         public ArmAction(double targetAngle) {
@@ -48,6 +50,15 @@ public class ArmSystem {
             if (timeSinceHit != null && timeSinceHit.seconds() > OSCILLATION_TIME) {
                 arm.setPower(0.0);
                 return false;
+            }
+
+            if (timeSinceStart == null) {
+                timeSinceStart = new ElapsedTime();
+            }
+
+            if (timeSinceStart.seconds() > TIMEOUT) {
+                arm.setPower(0.0);
+                throw new ArmTimeoutException();
             }
 
             if (armController.atTarget()) {

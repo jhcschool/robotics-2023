@@ -10,8 +10,8 @@ public class WristController {
 
     private static double BACKDROP_ANGLE = Math.toRadians(360 - 60);
     private static double ARM_THRESHOLD = Math.toRadians(95);
-    private static double IMPACT_TIME_THRESHOLD = 0.2;
-    private static double IMPACT_ANGLE_THRESHOLD = Math.toRadians(9);
+    private static double IMPACT_TIME_THRESHOLD = 0.35;
+    private static double IMPACT_ANGLE_THRESHOLD = Math.toRadians(12);
 
     private Wrist wrist;
     private double lastArmAngle = Arm.BASE_ANGLE;

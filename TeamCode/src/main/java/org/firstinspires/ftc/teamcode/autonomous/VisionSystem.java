@@ -33,70 +33,70 @@ public class VisionSystem {
     }
 
     public void initForAlliance(HardwareMap hardwareMap, AllianceColor allianceColor) {
-//        TeamPropProcessor.Builder builder = new TeamPropProcessor.Builder();
-//
-//        switch (allianceColor) {
-//            case RED:
-//                builder.setColor(RED_LOWER_THRESHOLD, RED_UPPER_THRESHOLD, RED_LOWER_THRESHOLD2, RED_UPPER_THRESHOLD2);
-//                break;
-//            case BLUE:
-//                builder.setColor(BLUE_LOWER_THRESHOLD, BLUE_UPPER_THRESHOLD);
-//                break;
-//        }
-//
-//        teamPropProcessor = builder.build();
-//
-//        visionPortal = new VisionPortal.Builder()
-//                .setCamera(hardwareMap.get(WebcamName.class, HardwareID.CAMERA))
-//                .addProcessor(teamPropProcessor)
-//                .setCameraResolution(new Size(640, 480))
-//                .setStreamFormat(VisionPortal.StreamFormat.YUY2)
-//                .enableLiveView(true)
-//                .setAutoStopLiveView(true)
-//                .build();
+        TeamPropProcessor.Builder builder = new TeamPropProcessor.Builder();
+
+        switch (allianceColor) {
+            case RED:
+                builder.setColor(RED_LOWER_THRESHOLD, RED_UPPER_THRESHOLD, RED_LOWER_THRESHOLD2, RED_UPPER_THRESHOLD2);
+                break;
+            case BLUE:
+                builder.setColor(BLUE_LOWER_THRESHOLD, BLUE_UPPER_THRESHOLD);
+                break;
+        }
+
+        teamPropProcessor = builder.build();
+
+        visionPortal = new VisionPortal.Builder()
+                .setCamera(hardwareMap.get(WebcamName.class, HardwareID.CAMERA))
+                .addProcessor(teamPropProcessor)
+                .setCameraResolution(new Size(640, 480))
+                .setStreamFormat(VisionPortal.StreamFormat.YUY2)
+                .enableLiveView(true)
+                .setAutoStopLiveView(true)
+                .build();
     }
 
     public void update() {
-//        PropLocation detection = teamPropProcessor.getDetection();
-//
-//        if (detection != null) {
-//            for (int i = lastDetections.length - 1; i > 0; i--) {
-//                lastDetections[i] = lastDetections[i - 1];
-//            }
-//
-//            lastDetections[0] = detection;
-//        }
+        PropLocation detection = teamPropProcessor.getDetection();
+
+        if (detection != null) {
+            for (int i = lastDetections.length - 1; i > 0; i--) {
+                lastDetections[i] = lastDetections[i - 1];
+            }
+
+            lastDetections[0] = detection;
+        }
     }
 
     public void stopStreaming() {
 
-//        visionPortal.stopStreaming();
+        visionPortal.stopStreaming();
     }
 
     public PropLocation getPropLocation() {
-//        // Return most common prop location
-//
-//        int[] counts = new int[PropLocation.values().length];
-//
-//        for (PropLocation detection : lastDetections) {
-//            if (detection != null) {
-//                counts[detection.ordinal()]++;
-//            }
-//        }
-//
-//        int maxCount = 0;
-//        PropLocation maxPropLocation = PropLocation.CENTER;
-//
-//        for (PropLocation propLocation : PropLocation.values()) {
-//            if (counts[propLocation.ordinal()] > maxCount) {
-//                maxCount = counts[propLocation.ordinal()];
-//                maxPropLocation = propLocation;
-//            }
-//        }
-//
-//        return maxPropLocation;
+        // Return most common prop location
 
-        return PropLocation.RIGHT;
+        int[] counts = new int[PropLocation.values().length];
+
+        for (PropLocation detection : lastDetections) {
+            if (detection != null) {
+                counts[detection.ordinal()]++;
+            }
+        }
+
+        int maxCount = 0;
+        PropLocation maxPropLocation = PropLocation.CENTER;
+
+        for (PropLocation propLocation : PropLocation.values()) {
+            if (counts[propLocation.ordinal()] > maxCount) {
+                maxCount = counts[propLocation.ordinal()];
+                maxPropLocation = propLocation;
+            }
+        }
+
+        return maxPropLocation;
+
+//        return PropLocation.RIGHT;
     }
 
 }

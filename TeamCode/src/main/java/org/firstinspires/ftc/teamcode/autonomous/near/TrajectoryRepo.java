@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode.autonomous.near;
 import com.acmerobotics.roadrunner.Action;
 import com.acmerobotics.roadrunner.Pose2d;
 
+import org.firstinspires.ftc.teamcode.autonomous.ParkingLocation;
 import org.firstinspires.ftc.teamcode.game.PropLocation;
 
 public interface TrajectoryRepo {

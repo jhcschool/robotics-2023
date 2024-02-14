@@ -11,7 +11,9 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.teamcode.actions.DelayedAction;
 import org.firstinspires.ftc.teamcode.autonomous.ArmSystem;
+import org.firstinspires.ftc.teamcode.autonomous.ArmTimeoutException;
 import org.firstinspires.ftc.teamcode.autonomous.ClawSystem;
+import org.firstinspires.ftc.teamcode.autonomous.ParkingLocation;
 import org.firstinspires.ftc.teamcode.autonomous.VisionSystem;
 import org.firstinspires.ftc.teamcode.autonomous.WristSystem;
 import org.firstinspires.ftc.teamcode.base.Mode;
@@ -20,9 +22,16 @@ import org.firstinspires.ftc.teamcode.game.AllianceColor;
 import org.firstinspires.ftc.teamcode.input.Button;
 import org.firstinspires.ftc.teamcode.input.GrizzlyGamepad;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Config
 @Autonomous(name = "Near Autonomous", group = "Autonomous")
 public class NearAutonomous extends Mode {
+
+    public static int CYCLE_COUNT = 0;
+    public static int CAMERA_TIME = 2;
+    public static int MAX_DELAY = 10;
 
     private AllianceColor allianceColor = AllianceColor.RED;
     private boolean confirmedAlliance = false;
@@ -37,6 +46,7 @@ public class NearAutonomous extends Mode {
     private Action action;
     private PlayStyle playStyle = PlayStyle.AGGRESSIVE;
     private ParkingLocation parkingLocation = ParkingLocation.INNER;
+    private int startDelay = 2;
 
     @Override
     public void onInit() {
@@ -78,13 +88,23 @@ public class NearAutonomous extends Mode {
                 allianceColor = AllianceColor.BLUE;
             }
 
-            telemetry.addData("Play Style", playStyle.toString());
-            telemetry.addLine("Press DPad Up for aggressive play style, DPad Down for conservative play style");
+//            telemetry.addData("Play Style", playStyle.toString());
+//            telemetry.addLine("Press DPad Up for aggressive play style, DPad Down for conservative play style");
+//            if (gamepad.getButton(Button.DPAD_UP)) {
+//                playStyle = PlayStyle.AGGRESSIVE;
+//            } else if (gamepad.getButton(Button.DPAD_DOWN)) {
+//                playStyle = PlayStyle.CONSERVATIVE;
+//            }
+
+            telemetry.addData("Start Delay", startDelay);
+            telemetry.addLine("Press DPad up to increase delay, DPad down to decrease delay");
             if (gamepad.getButton(Button.DPAD_UP)) {
-                playStyle = PlayStyle.AGGRESSIVE;
+                startDelay++;
             } else if (gamepad.getButton(Button.DPAD_DOWN)) {
-                playStyle = PlayStyle.CONSERVATIVE;
+                startDelay--;
             }
+            startDelay = Math.max(CAMERA_TIME, Math.min(startDelay, MAX_DELAY));
+
 
             telemetry.addData("Parking Location", parkingLocation.toString());
             telemetry.addLine("Press DPad left for inner parking location, DPad right for center parking location");
@@ -101,10 +121,11 @@ public class NearAutonomous extends Mode {
                 confirmedAlliance = true;
                 initForAlliance();
             }
+        } else {
+            visionSystem.update();
         }
 
         drive.updatePoseEstimate();
-        visionSystem.update();
         armSystem.beforeStart();
     }
 
@@ -124,21 +145,21 @@ public class NearAutonomous extends Mode {
         armSystem.onInit();
     }
 
+    private ElapsedTime timeSinceStart;
+    private boolean createdActions = false;
+
     @Override
     public void onStart() {
         super.onStart();
+        timeSinceStart = new ElapsedTime();
 
         if (!confirmedAlliance) {
             initForAlliance(); // Shouldn't happen, but just in case
-            return;
         }
+    }
 
+    private void createActions() {
         visionSystem.stopStreaming();
-
-        Action clawClose = new ParallelAction(
-                clawSystem.closeLeft(),
-                clawSystem.closeRight()
-        );
 
         Action toFloorPlace = new SequentialAction(
                 trajectoryRepo.toFloorPlace(visionSystem.getPropLocation()),
@@ -152,31 +173,69 @@ public class NearAutonomous extends Mode {
                 ),
                 clawSystem.openRight());
 
-        action = new SequentialAction(
-                clawClose,
+        Action basicActions = new SequentialAction(
                 toFloorPlace,
-                toFirstBackdrop,
-                armSystem.lowerArm()
+                toFirstBackdrop
         );
+
+        if (CYCLE_COUNT < 1) {
+            Action toPark = new ParallelAction(
+                    armSystem.setAngle(0),
+                    trajectoryRepo.toPark(visionSystem.getPropLocation(), parkingLocation)
+            );
+
+            action = new SequentialAction(
+                    basicActions,
+                    toPark,
+                    armSystem.lowerArm()
+            );
+        } else {
+            List<Action> actionList = new ArrayList<>();
+
+            for (int i = 0; i < CYCLE_COUNT; i++) {
+                // TODO: add actions to cycle
+            }
+        }
+
+        createdActions = true;
     }
 
-    private ElapsedTime timer = new ElapsedTime();
     private double lastTime = 0;
 
     @Override
     public void tick(TelemetryPacket packet) {
         super.tick(packet);
 
-        drive.updatePoseEstimate();
-        action.run(packet);
-
         double angle = armSystem.getAngle();
         wristSystem.update(angle);
+
+        double currentTime = timeSinceStart.seconds();
+
+        if (currentTime < CAMERA_TIME) {
+            visionSystem.update();
+            return;
+        }
+
+        if (!createdActions) {
+            createActions();
+        }
+
+        if (currentTime < startDelay) {
+            telemetry.addData("Time Until Start", startDelay - currentTime);
+            return;
+        }
+
+
+        drive.updatePoseEstimate();
+        try {
+            action.run(packet);
+        } catch (ArmTimeoutException e) {
+            action = armSystem.lowerArm();
+        }
 
         telemetry.addData("Pose", drive.pose);
         telemetry.addData("Prop Location", visionSystem.getPropLocation());
 
-        double currentTime = timer.seconds();
         telemetry.addData("Loop Time", currentTime - lastTime);
         lastTime = currentTime;
 

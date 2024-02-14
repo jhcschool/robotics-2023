@@ -78,4 +78,8 @@ public class GrizzlyGamepad {
     public void setLed(double r, double g, double b) {
         gamepad.setLedColor(r, g, b, Gamepad.LED_DURATION_CONTINUOUS);
     }
+
+    public void rumble(int durationMs) {
+        gamepad.rumble(durationMs);
+    }
 }

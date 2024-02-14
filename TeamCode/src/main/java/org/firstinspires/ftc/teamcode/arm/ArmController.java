@@ -8,15 +8,15 @@ import org.firstinspires.ftc.teamcode.utils.PIDController;
 public class ArmController {
 
     // Currently working: K_P = 0.4, power multiplier = 1.0, deadzone = 0, max_power = 1.0
-    public static double K_P = 0.55;
+    public static double K_P = 0.4;
     public static double K_I = 0.0;
     public static double K_D = 0.0;
-    public static double K_STATIC = 0.15;
+    public static double K_STATIC = 0.075;
     public static double K_COS = 0.1;
     public static double MAX_POWER = 1.0;
     public static double POWER_MULTIPLIER = 1.0;
-    public static double DEADZONE = 10;
-    public static double ANGLE_WEIGHTING = 0.6;
+    public static double DEADZONE = 7;
+    public static double ANGLE_WEIGHTING = 0.4;
 
     public static double POSITION_TOLERANCE = Math.toRadians(5.0);
     public static double VELOCITY_TOLERANCE = Math.toRadians(5.0);
@@ -67,7 +67,7 @@ public class ArmController {
         pidController.setTolerance(pidController.getTolerance()[0], velocityTolerance);
     }
 
-    private static double feedforward(double angle) {
+    public static double feedforward(double angle) {
         return K_COS * Math.cos(angle);
     }
 }

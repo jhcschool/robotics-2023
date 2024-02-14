@@ -24,7 +24,7 @@ import org.firstinspires.ftc.teamcode.wrist.WristController;
 public class BasicControlled extends Mode {
     public static double K_COS = 0.10;
     public static double DEADZONE = 0;
-    public static double ANGLE_WEIGHTING = 0.6;
+    public static double ANGLE_WEIGHTING = 0.7;
     private boolean clawOpen = true;
     private GrizzlyGamepad gamepad;
     private MecanumDrive drive;
@@ -142,6 +142,7 @@ public class BasicControlled extends Mode {
             if (!holdingClampToggle) {
                 clamp = !clamp;
                 holdingClampToggle = true;
+                gamepad.rumble(100);
             }
         } else {
             holdingClampToggle = false;

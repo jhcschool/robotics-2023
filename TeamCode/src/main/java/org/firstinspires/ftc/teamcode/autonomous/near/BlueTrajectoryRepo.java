@@ -4,6 +4,7 @@ import com.acmerobotics.roadrunner.Action;
 import com.acmerobotics.roadrunner.Pose2d;
 import com.acmerobotics.roadrunner.Vector2d;
 
+import org.firstinspires.ftc.teamcode.autonomous.ParkingLocation;
 import org.firstinspires.ftc.teamcode.drive.MecanumDrive;
 import org.firstinspires.ftc.teamcode.game.FieldInfo;
 import org.firstinspires.ftc.teamcode.game.PropLocation;
@@ -34,8 +35,10 @@ public class BlueTrajectoryRepo implements TrajectoryRepo {
     public Action toFloorPlace(PropLocation propLocation) {
         switch (propLocation) {
             case RIGHT: {
-                floorPlacePose = new Pose2d(0.75 + RobotConstraints.CLAW_LENGTH_FROM_CENTER, 24.75 + RobotConstraints.LEFT_CLAW_WIDTH_FROM_CENTER, Math.toRadians(180));
-                break;
+                floorPlacePose = new Pose2d(0.75 + RobotConstraints.CLAW_LENGTH_FROM_CENTER, 30 + RobotConstraints.LEFT_CLAW_WIDTH_FROM_CENTER, Math.toRadians(180));
+                return drive.actionBuilder(FieldInfo.getRealPose(START_POSE))
+                        .splineToSplineHeading(FieldInfo.getRealPose(floorPlacePose), floorPlacePose.heading)
+                        .build();
             }
             case CENTER: {
                 floorPlacePose = new Pose2d(12 + RobotConstraints.CLAW_LENGTH_FROM_CENTER, 24.75 + RobotConstraints.LEFT_CLAW_WIDTH_FROM_CENTER, Math.toRadians(180));
