@@ -20,7 +20,9 @@ import org.firstinspires.ftc.teamcode.base.Mode;
 import org.firstinspires.ftc.teamcode.drive.MecanumDrive;
 import org.firstinspires.ftc.teamcode.game.AllianceColor;
 import org.firstinspires.ftc.teamcode.input.Button;
+import org.firstinspires.ftc.teamcode.input.ButtonAction;
 import org.firstinspires.ftc.teamcode.input.GrizzlyGamepad;
+import org.firstinspires.ftc.teamcode.robot.StoragePersistence;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -73,6 +75,7 @@ public class NearAutonomous extends Mode {
     @Override
     public void beforeStartLoop() {
         super.beforeStartLoop();
+        gamepad.update();
 
         if (action != null && !action.run(new TelemetryPacket())) {
             action = null;
@@ -98,9 +101,9 @@ public class NearAutonomous extends Mode {
 
             telemetry.addData("Start Delay", startDelay);
             telemetry.addLine("Press DPad up to increase delay, DPad down to decrease delay");
-            if (gamepad.getButton(Button.DPAD_UP)) {
+            if (gamepad.getButtonAction(Button.DPAD_UP) == ButtonAction.PRESS) {
                 startDelay++;
-            } else if (gamepad.getButton(Button.DPAD_DOWN)) {
+            } else if (gamepad.getButtonAction(Button.DPAD_DOWN) == ButtonAction.PRESS) {
                 startDelay--;
             }
             startDelay = Math.max(CAMERA_TIME, Math.min(startDelay, MAX_DELAY));
@@ -242,4 +245,11 @@ public class NearAutonomous extends Mode {
         telemetry.addData("Arm Angle", Math.toDegrees(angle));
     }
 
+    @Override
+    public void onEnd() {
+        super.onEnd();
+
+        StoragePersistence.robotPose = drive.pose;
+        StoragePersistence.allianceColor = allianceColor;
+    }
 }

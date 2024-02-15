@@ -82,4 +82,8 @@ public class GrizzlyGamepad {
     public void rumble(int durationMs) {
         gamepad.rumble(durationMs);
     }
+
+    public void rumble(double rumble1, double rumble2, int durationMs) {
+        gamepad.rumble(rumble1, rumble2, durationMs);
+    }
 }

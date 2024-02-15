@@ -54,7 +54,7 @@ import java.util.List;
 public final class MecanumDrive {
     public static class Params {
         // drive model parameters
-        public double inPerTick = 0.0005306579;
+        public double inPerTick = 0.000529809793717;
         public double lateralInPerTick = 1;
         public double trackWidthTicks = 23700;
 
@@ -74,7 +74,7 @@ public final class MecanumDrive {
 
         // path controller gains
         public double axialGain = 12;
-        public double lateralGain = 7000;
+        public double lateralGain = 10000;
         public double headingGain = 12; // shared with turn
 
         public double axialVelGain = 1;

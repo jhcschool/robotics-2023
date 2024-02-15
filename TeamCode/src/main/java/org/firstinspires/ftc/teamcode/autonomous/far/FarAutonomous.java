@@ -21,14 +21,16 @@ import org.firstinspires.ftc.teamcode.drive.MecanumDrive;
 import org.firstinspires.ftc.teamcode.game.AllianceColor;
 import org.firstinspires.ftc.teamcode.game.PropLocation;
 import org.firstinspires.ftc.teamcode.input.Button;
+import org.firstinspires.ftc.teamcode.input.ButtonAction;
 import org.firstinspires.ftc.teamcode.input.GrizzlyGamepad;
+import org.firstinspires.ftc.teamcode.robot.StoragePersistence;
 
 @Config
 @Autonomous(name = "Far Autonomous", group = "Autonomous")
 public class FarAutonomous extends Mode {
 
     public static int CAMERA_TIME = 2;
-    public static int MAX_DELAY = 10;
+    public static int MAX_DELAY = 4;
 
     private AllianceColor allianceColor = AllianceColor.RED;
     private boolean confirmedAlliance = false;
@@ -69,6 +71,7 @@ public class FarAutonomous extends Mode {
     @Override
     public void beforeStartLoop() {
         super.beforeStartLoop();
+        gamepad.update();
 
         if (action != null && !action.run(new TelemetryPacket())) {
             action = null;
@@ -86,9 +89,9 @@ public class FarAutonomous extends Mode {
 
             telemetry.addData("Start Delay", startDelay);
             telemetry.addLine("Press DPad up to increase delay, DPad down to decrease delay");
-            if (gamepad.getButton(Button.DPAD_UP)) {
+            if (gamepad.getButtonAction(Button.DPAD_UP) == ButtonAction.PRESS) {
                 startDelay++;
-            } else if (gamepad.getButton(Button.DPAD_DOWN)) {
+            } else if (gamepad.getButtonAction(Button.DPAD_DOWN) == ButtonAction.PRESS) {
                 startDelay--;
             }
             startDelay = Math.max(CAMERA_TIME, Math.min(startDelay, MAX_DELAY));
@@ -157,17 +160,17 @@ public class FarAutonomous extends Mode {
 
         Action toWaitPosition = new SequentialAction(
                 new ParallelAction(
-                        new DelayedAction(0.3, trajectoryRepo.toWaitPosition()),
+                        new DelayedAction(1.0, trajectoryRepo.toWaitPosition()),
                         armSystem.setAngle(0)
                 ),
-                new DelayedAction(startDelay));
+                new DelayedAction(startDelay - CAMERA_TIME));
 
         Action toIntermediatePosition = trajectoryRepo.toIntermediatePosition();
 
         Action toBackdrop = new SequentialAction(
                 new ParallelAction(
-                        trajectoryRepo.toBackdrop(),
-                        armSystem.raiseArm()
+                        armSystem.raiseArm(),
+                        trajectoryRepo.toBackdrop()
                 ),
                 clawSystem.openRight());
 
@@ -204,11 +207,6 @@ public class FarAutonomous extends Mode {
             createActions();
         }
 
-        if (currentTime < startDelay) {
-            telemetry.addData("Time Until Start", startDelay - currentTime);
-            return;
-        }
-
 
         drive.updatePoseEstimate();
         try {
@@ -224,6 +222,14 @@ public class FarAutonomous extends Mode {
         lastTime = currentTime;
 
         telemetry.addData("Arm Angle", Math.toDegrees(angle));
+    }
+
+    @Override
+    public void onEnd() {
+        super.onEnd();
+
+        StoragePersistence.robotPose = drive.pose;
+        StoragePersistence.allianceColor = allianceColor;
     }
 
 }

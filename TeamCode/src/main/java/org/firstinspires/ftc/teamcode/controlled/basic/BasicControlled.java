@@ -16,6 +16,7 @@ import org.firstinspires.ftc.teamcode.input.Axis;
 import org.firstinspires.ftc.teamcode.input.Button;
 import org.firstinspires.ftc.teamcode.input.ButtonAction;
 import org.firstinspires.ftc.teamcode.input.GrizzlyGamepad;
+import org.firstinspires.ftc.teamcode.robot.StoragePersistence;
 import org.firstinspires.ftc.teamcode.wrist.Wrist;
 import org.firstinspires.ftc.teamcode.wrist.WristController;
 
@@ -44,13 +45,15 @@ public class BasicControlled extends Mode {
 
     private ElapsedTime timer;
     private double lastTime = 0;
+    private Pose2d lastPose;
 
     @Override
     public void onInit() {
         super.onInit();
 
         gamepad = new GrizzlyGamepad(gamepad1);
-        drive = new MecanumDrive(hardwareMap, new Pose2d(0, 0, 0));
+        drive = new MecanumDrive(hardwareMap, StoragePersistence.robotPose);
+        lastPose = drive.pose;
 
         arm = new Arm(hardwareMap);
         claw = new Claw(hardwareMap);
@@ -65,6 +68,7 @@ public class BasicControlled extends Mode {
 
         setGamepadLed();
     }
+
 
     @Override
     public void tick(TelemetryPacket telemetryPacket) {
@@ -142,16 +146,24 @@ public class BasicControlled extends Mode {
             if (!holdingClampToggle) {
                 clamp = !clamp;
                 holdingClampToggle = true;
-                gamepad.rumble(100);
+                gamepad.rumble(1, 1, 400);
             }
         } else {
             holdingClampToggle = false;
+        }
+
+        final int xThreshold = 36;
+        if (lastPose.position.x < xThreshold && drive.pose.position.x >= xThreshold) {
+            gamepad.rumble(1, 1, 200);
         }
 
         telemetry.addData("Claw Open", clawOpen);
         telemetry.addData("Wrist Angle", wrist.getAngleDegrees());
 
         telemetry.addData("Control Reference Mode", controlReferenceMode);
+        telemetry.addData("Pose", drive.pose.toString());
+
+        lastPose = drive.pose;
     }
 
     private void setGamepadLed() {
@@ -160,5 +172,12 @@ public class BasicControlled extends Mode {
         } else {
             gamepad.setLed(0, 0, 255);
         }
+    }
+
+    @Override
+    public void onEnd() {
+        super.onEnd();
+
+        StoragePersistence.robotPose = drive.pose;
     }
 }

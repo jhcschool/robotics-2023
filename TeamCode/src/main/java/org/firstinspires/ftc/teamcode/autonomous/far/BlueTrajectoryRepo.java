@@ -13,12 +13,12 @@ import org.firstinspires.ftc.teamcode.robot.RobotConstraints;
 public class BlueTrajectoryRepo implements TrajectoryRepo {
     private MecanumDrive drive;
     private PropLocation propLocation;
-    private static final Pose2d START_POSE = new Pose2d(-36, 72 - RobotConstraints.LENGTH_FROM_CENTER, Math.toRadians(270));
+    private static final Pose2d START_POSE = new Pose2d(-36, 71.5 - RobotConstraints.LENGTH_FROM_CENTER, Math.toRadians(270));
     private Pose2d floorPlacePose;
     private static final Pose2d WAIT_POSE = new Pose2d(-48, 60, Math.toRadians(180));
     private static final Pose2d INTERMEDIATE_POSE = new Pose2d(24, 60, Math.toRadians(180));
     private Pose2d backdropPose;
-    private static final Pose2d CENTER_PARK_POSE = new Pose2d(60, 12, Math.toRadians(180));
+    private static final Pose2d CENTER_PARK_POSE = new Pose2d(60, 10, Math.toRadians(180));
     private static final Pose2d INNER_PARK_POSE = new Pose2d(60, 60, Math.toRadians(180));
 
     public BlueTrajectoryRepo(MecanumDrive drive, PropLocation propLocation) {
@@ -27,15 +27,15 @@ public class BlueTrajectoryRepo implements TrajectoryRepo {
 
         switch (propLocation) {
             case RIGHT: {
-                floorPlacePose = new Pose2d(-47.25 - RobotConstraints.LEFT_CLAW_WIDTH_FROM_CENTER, 24.75 + RobotConstraints.CLAW_LENGTH_FROM_CENTER, Math.toRadians(270));
+                floorPlacePose = new Pose2d(-47.5 - RobotConstraints.LEFT_CLAW_WIDTH_FROM_CENTER, 24.5 + RobotConstraints.CLAW_LENGTH_FROM_CENTER, Math.toRadians(270));
                 break;
             }
             case CENTER: {
-                floorPlacePose = new Pose2d(-36 - RobotConstraints.LEFT_CLAW_WIDTH_FROM_CENTER, 24.75 + RobotConstraints.CLAW_LENGTH_FROM_CENTER, Math.toRadians(270));
+                floorPlacePose = new Pose2d(-36, 24.5 + RobotConstraints.CLAW_LENGTH_FROM_CENTER, Math.toRadians(270));
                 break;
             }
             case LEFT: {
-                floorPlacePose = new Pose2d(-24.75 - RobotConstraints.CLAW_LENGTH_FROM_CENTER, 30 + RobotConstraints.LEFT_CLAW_WIDTH_FROM_CENTER, Math.toRadians(0));
+                floorPlacePose = new Pose2d(-24.5 - RobotConstraints.CLAW_LENGTH_FROM_CENTER, 30 + RobotConstraints.LEFT_CLAW_WIDTH_FROM_CENTER, Math.toRadians(0));
                 break;
             }
         }

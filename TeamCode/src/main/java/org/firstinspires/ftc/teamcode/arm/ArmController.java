@@ -18,7 +18,7 @@ public class ArmController {
     public static double DEADZONE = 7;
     public static double ANGLE_WEIGHTING = 0.4;
 
-    public static double POSITION_TOLERANCE = Math.toRadians(5.0);
+    public static double POSITION_TOLERANCE = Math.toRadians(7.5);
     public static double VELOCITY_TOLERANCE = Math.toRadians(5.0);
 
     private PIDController pidController;
