@@ -19,6 +19,7 @@ import org.firstinspires.ftc.teamcode.autonomous.WristSystem;
 import org.firstinspires.ftc.teamcode.base.Mode;
 import org.firstinspires.ftc.teamcode.drive.MecanumDrive;
 import org.firstinspires.ftc.teamcode.game.AllianceColor;
+import org.firstinspires.ftc.teamcode.game.FieldInfo;
 import org.firstinspires.ftc.teamcode.game.PropLocation;
 import org.firstinspires.ftc.teamcode.input.Button;
 import org.firstinspires.ftc.teamcode.input.ButtonAction;
@@ -222,6 +223,7 @@ public class FarAutonomous extends Mode {
         lastTime = currentTime;
 
         telemetry.addData("Arm Angle", Math.toDegrees(angle));
+        telemetry.addData("Projected Pose", FieldInfo.getProjectedPose(drive.pose));
     }
 
     @Override

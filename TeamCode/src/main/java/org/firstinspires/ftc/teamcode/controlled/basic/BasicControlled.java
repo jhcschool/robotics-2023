@@ -12,6 +12,7 @@ import org.firstinspires.ftc.teamcode.arm.Arm;
 import org.firstinspires.ftc.teamcode.base.Mode;
 import org.firstinspires.ftc.teamcode.claw.Claw;
 import org.firstinspires.ftc.teamcode.drive.MecanumDrive;
+import org.firstinspires.ftc.teamcode.game.FieldInfo;
 import org.firstinspires.ftc.teamcode.input.Axis;
 import org.firstinspires.ftc.teamcode.input.Button;
 import org.firstinspires.ftc.teamcode.input.ButtonAction;
@@ -26,6 +27,10 @@ public class BasicControlled extends Mode {
     public static double K_COS = 0.10;
     public static double DEADZONE = 0;
     public static double ANGLE_WEIGHTING = 0.7;
+    public static int X_THRESHOLD = 36;
+    public static double MOTOR_POWER_PRECISION = 0.5;
+    public static double ARM_POWER_PRECISION = 0.5;
+
     private boolean clawOpen = true;
     private GrizzlyGamepad gamepad;
     private MecanumDrive drive;
@@ -53,7 +58,7 @@ public class BasicControlled extends Mode {
 
         gamepad = new GrizzlyGamepad(gamepad1);
         drive = new MecanumDrive(hardwareMap, StoragePersistence.robotPose);
-        lastPose = drive.pose;
+        lastPose = FieldInfo.getProjectedPose(drive.pose);
 
         arm = new Arm(hardwareMap);
         claw = new Claw(hardwareMap);
@@ -76,6 +81,7 @@ public class BasicControlled extends Mode {
         gamepad.update();
 
         drive.updatePoseEstimate();
+        Pose2d projectedPose = FieldInfo.getProjectedPose(drive.pose);
 
         float forward = -gamepad.getAxis(Axis.LEFT_STICK_Y);
         float right = -gamepad.getAxis(Axis.LEFT_STICK_X);
@@ -87,6 +93,12 @@ public class BasicControlled extends Mode {
             powers = new PoseVelocity2d(drive.pose.heading.inverse().times(nonRotated), rotation);
         } else {
             powers = new PoseVelocity2d(new Vector2d(forward, right), rotation);
+        }
+
+        boolean precisionMode = gamepad.getButton(Button.LEFT_STICK_BUTTON);
+
+        if (precisionMode) {
+            powers = new PoseVelocity2d(powers.linearVel.times(MOTOR_POWER_PRECISION), powers.angVel * MOTOR_POWER_PRECISION);
         }
 
         drive.setDrivePowers(powers);
@@ -152,8 +164,7 @@ public class BasicControlled extends Mode {
             holdingClampToggle = false;
         }
 
-        final int xThreshold = 36;
-        if (lastPose.position.x < xThreshold && drive.pose.position.x >= xThreshold) {
+        if (lastPose.position.x < X_THRESHOLD && projectedPose.position.x >= X_THRESHOLD) {
             gamepad.rumble(1, 1, 200);
         }
 
@@ -162,8 +173,9 @@ public class BasicControlled extends Mode {
 
         telemetry.addData("Control Reference Mode", controlReferenceMode);
         telemetry.addData("Pose", drive.pose.toString());
+        telemetry.addData("Projected Pose", projectedPose.toString());
 
-        lastPose = drive.pose;
+        lastPose = projectedPose;
     }
 
     private void setGamepadLed() {

@@ -26,7 +26,7 @@ public class VisionSystem {
     private TeamPropProcessor teamPropProcessor;
     private VisionPortal visionPortal;
 
-    private PropLocation[] lastDetections = new PropLocation[10];
+    private PropLocation[] lastDetections = new PropLocation[3];
 
 
     public VisionSystem() {

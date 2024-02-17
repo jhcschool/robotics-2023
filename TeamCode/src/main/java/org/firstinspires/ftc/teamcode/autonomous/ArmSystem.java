@@ -14,7 +14,7 @@ import org.firstinspires.ftc.teamcode.wrist.WristController;
 
 @Config
 public class ArmSystem {
-    public static double RAISED_ANGLE = Math.toRadians(160);
+    public static double RAISED_ANGLE = Math.toRadians(165);
     public static double OSCILLATION_TIME = 0.2;
 
     private Arm arm;

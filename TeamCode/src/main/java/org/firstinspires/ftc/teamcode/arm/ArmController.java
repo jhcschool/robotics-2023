@@ -8,7 +8,7 @@ import org.firstinspires.ftc.teamcode.utils.PIDController;
 public class ArmController {
 
     // Currently working: K_P = 0.4, power multiplier = 1.0, deadzone = 0, max_power = 1.0
-    public static double K_P = 0.4;
+    public static double K_P = 0.45;
     public static double K_I = 0.0;
     public static double K_D = 0.0;
     public static double K_STATIC = 0.075;
