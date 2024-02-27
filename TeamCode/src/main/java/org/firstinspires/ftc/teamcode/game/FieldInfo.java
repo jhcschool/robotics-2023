@@ -5,7 +5,7 @@ import com.acmerobotics.roadrunner.Vector2d;
 
 public class FieldInfo {
 
-    public static final double SIZE_RATIO = 141.1 / 144.0; // Real field size divided by projected field size
+    public static final double SIZE_RATIO = 141.75 / 144.0; // Real field size divided by projected field size
     public static final double OUTSIDE_CUTOFF = 0.0; // Outside x inches of field are cut off
 
     public static Pose2d getRealPose(Pose2d pose) {

@@ -13,13 +13,13 @@ import org.firstinspires.ftc.teamcode.robot.RobotConstraints;
 public class RedTrajectoryRepo implements TrajectoryRepo {
     private MecanumDrive drive;
     private PropLocation propLocation;
-    private static final Pose2d START_POSE = new Pose2d(-36, -71.4 + RobotConstraints.LENGTH_FROM_CENTER, Math.toRadians(90));
+    private static final Pose2d START_POSE = new Pose2d(-36, -71.6 + RobotConstraints.LENGTH_FROM_CENTER, Math.toRadians(90));
     private Pose2d floorPlacePose;
     private static final Pose2d WAIT_POSE = new Pose2d(-48, -60, Math.toRadians(180));
     private static final Pose2d INTERMEDIATE_POSE = new Pose2d(24, -60, Math.toRadians(180));
     private Pose2d backdropPose;
-    private static final Pose2d CENTER_PARK_POSE = new Pose2d(60, -10, Math.toRadians(180));
-    private static final Pose2d INNER_PARK_POSE = new Pose2d(60, -62, Math.toRadians(180));
+    private static final Pose2d CENTER_PARK_POSE = new Pose2d(60, -12, Math.toRadians(180));
+    private static final Pose2d INNER_PARK_POSE = new Pose2d(64, -62, Math.toRadians(180));
 
     public RedTrajectoryRepo(MecanumDrive drive, PropLocation propLocation) {
         this.drive = drive;
@@ -98,8 +98,8 @@ public class RedTrajectoryRepo implements TrajectoryRepo {
                         .strafeToLinearHeading(FieldInfo.getRealVector(CENTER_PARK_POSE.position), CENTER_PARK_POSE.heading)
                         .build();
             case INNER:
-                return drive.actionBuilder(FieldInfo.getRealPose(backdropPose))
-                        .strafeToLinearHeading(FieldInfo.getRealVector(new Vector2d(36, -60)), Math.toRadians(180))
+                return drive.actionBuilder(FieldInfo.getRealPose(INTERMEDIATE_POSE))
+//                        .strafeToLinearHeading(FieldInfo.getRealVector(new Vector2d(36, -60)), Math.toRadians(180))
                         .strafeToLinearHeading(FieldInfo.getRealVector(INNER_PARK_POSE.position), INNER_PARK_POSE.heading)
                         .build();
         }

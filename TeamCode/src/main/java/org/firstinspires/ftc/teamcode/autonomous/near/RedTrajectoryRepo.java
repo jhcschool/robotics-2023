@@ -13,7 +13,7 @@ import org.firstinspires.ftc.teamcode.robot.RobotConstraints;
 public class RedTrajectoryRepo implements TrajectoryRepo {
     private MecanumDrive drive;
     private PlayStyle playStyle;
-    private static final Pose2d START_POSE = new Pose2d(12, -71.4 + RobotConstraints.LENGTH_FROM_CENTER, Math.toRadians(90));
+    private static final Pose2d START_POSE = new Pose2d(12, -71.6 + RobotConstraints.LENGTH_FROM_CENTER, Math.toRadians(90));
     private Pose2d floorPlacePose;
     private static final Pose2d CENTER_BACKDROP_POSE = new Pose2d(60 - RobotConstraints.OUTPUT_LENGTH_FROM_CENTER, -36, Math.toRadians(180));
     private Pose2d firstBackdropPose = CENTER_BACKDROP_POSE;
@@ -36,17 +36,17 @@ public class RedTrajectoryRepo implements TrajectoryRepo {
 
         switch (propLocation) {
             case LEFT: {
-                floorPlacePose = new Pose2d(0.25 + RobotConstraints.CLAW_LENGTH_FROM_CENTER, -30 - RobotConstraints.LEFT_CLAW_WIDTH_FROM_CENTER, Math.toRadians(180));
+                floorPlacePose = new Pose2d(0.5 + RobotConstraints.CLAW_LENGTH_FROM_CENTER, -30 - RobotConstraints.LEFT_CLAW_WIDTH_FROM_CENTER, Math.toRadians(180));
                 return drive.actionBuilder(FieldInfo.getRealPose(START_POSE))
                         .splineToSplineHeading(FieldInfo.getRealPose(floorPlacePose), floorPlacePose.heading)
                         .build();
             }
             case CENTER: {
-                floorPlacePose = new Pose2d(12 + RobotConstraints.CLAW_LENGTH_FROM_CENTER, -24.25 + RobotConstraints.LEFT_CLAW_WIDTH_FROM_CENTER, Math.toRadians(180));
+                floorPlacePose = new Pose2d(12 + RobotConstraints.CLAW_LENGTH_FROM_CENTER, -24.5 + RobotConstraints.LEFT_CLAW_WIDTH_FROM_CENTER, Math.toRadians(180));
                 break;
             }
             case RIGHT: {
-                floorPlacePose = new Pose2d(23.75 + RobotConstraints.CLAW_LENGTH_FROM_CENTER, -26 + RobotConstraints.LEFT_CLAW_WIDTH_FROM_CENTER, Math.toRadians(180));
+                floorPlacePose = new Pose2d(23.5 + RobotConstraints.CLAW_LENGTH_FROM_CENTER, -26 + RobotConstraints.LEFT_CLAW_WIDTH_FROM_CENTER, Math.toRadians(180));
                 break;
             }
         }

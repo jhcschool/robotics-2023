@@ -168,21 +168,21 @@ public class FarAutonomous extends Mode {
 
         Action toIntermediatePosition = trajectoryRepo.toIntermediatePosition();
 
-        Action toBackdrop = new SequentialAction(
-                new ParallelAction(
-                        armSystem.raiseArm(),
-                        trajectoryRepo.toBackdrop()
-                ),
-                clawSystem.openRight());
+//        Action toBackdrop = new SequentialAction(
+//                new ParallelAction(
+//                        armSystem.raiseArm(),
+//                        new DelayedAction(1.0, trajectoryRepo.toBackdrop())
+//                ),
+//                clawSystem.openRight());
 
         action = new SequentialAction(
                 toFloorPlace,
                 toWaitPosition,
                 toIntermediatePosition,
-                toBackdrop,
-                armSystem.setAngle(0),
+//                armSystem.setAngle(0),
                 trajectoryRepo.toPark(parkingLocation),
-                armSystem.lowerArm()
+                clawSystem.openRight()
+//                armSystem.lowerArm()
         );
 
         createdActions = true;

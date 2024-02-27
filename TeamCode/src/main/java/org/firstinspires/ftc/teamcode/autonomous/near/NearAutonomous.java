@@ -171,7 +171,7 @@ public class NearAutonomous extends Mode {
 
         Action toFirstBackdrop = new SequentialAction(
                 new ParallelAction(
-                        new DelayedAction(0.3, trajectoryRepo.toFirstBackdrop(visionSystem.getPropLocation())),
+                        new DelayedAction(1.0, trajectoryRepo.toFirstBackdrop(visionSystem.getPropLocation())),
                         armSystem.raiseArm()
                 ),
                 clawSystem.openRight());
